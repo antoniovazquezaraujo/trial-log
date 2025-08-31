@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Los perfiles de usuario son privados
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Reglas para la nueva colección de grupos
+    match /groups/{groupId} {
+      // Permite leer el documento del grupo si el usuario es miembro.
+      allow get: if request.auth.uid in resource.data.members;
+      allow list: if request.auth != null;
+
+      // Permite crear, actualizar y borrar si el usuario es 'admin'.
+      allow write: if (request.method == 'create' && request.auth.uid == request.resource.data.owner && request.resource.data.members[request.auth.uid] == 'admin') ||
+                    ((request.method == 'update' || request.method == 'delete') && resource.data.members[request.auth.uid] == 'admin');
+
+      // Reglas para las subcolecciones (temas, ensayos)
+      match /{subcollection}/{docId} {
+        // Permite leer si el usuario es miembro del grupo padre.
+        allow read: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+
+        // Permite escribir si el usuario es 'admin' del grupo padre.
+        allow write: if get(/databases/$(database)/documents/groups/$(groupId)).data.members[request.auth.uid] == 'admin';
+      }
+    }
+  }
+}

@@ -60,16 +60,45 @@
 </head>
 <body class="bg-indigo-50 flex flex-col items-center min-h-screen p-4">
 
-    <!-- Contenedor principal de la aplicación -->
-    <div id="main-container" class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-2xl w-full space-y-6 md:space-y-8 mt-6">
+    <!-- Vista de Login -->
+    <div id="login-view" class="w-full max-w-sm mx-auto mt-20 text-center">
+        <h1 class="text-4xl font-bold text-indigo-800 mb-6">🎶 Gestor de Ensayos</h1>
+        <p class="text-gray-600 mb-8">Inicia sesión para continuar</p>
+        <button id="login-btn" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md flex items-center justify-center mx-auto">
+            <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,35.688,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
+            Iniciar sesión con Google
+        </button>
+    </div>
+
+    <!-- Contenedor principal de la aplicación (oculto por defecto) -->
+    <div id="main-container" class="hidden bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-2xl w-full space-y-6 md:space-y-8 mt-6">
         
+        <!-- Perfil de usuario y botón de logout -->
+        <div id="user-profile" class="flex items-center justify-between border-b pb-4">
+            <div>
+                <p class="text-lg font-semibold text-gray-800">Bienvenido, <span id="user-name"></span></p>
+                <p class="text-sm text-gray-500" id="user-email"></p>
+            </div>
+            <button id="logout-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-red-600">
+                Cerrar Sesión
+            </button>
+        </div>
+
+        <!-- Sección de Grupos -->
+        <div id="groups-section" class="border-b pb-4">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xl font-semibold text-gray-800">Mis Grupos</h2>
+                <button id="create-group-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-green-600">Crear Grupo</button>
+            </div>
+            <div id="groups-list" class="space-y-2">
+                <!-- Los grupos se listarán aquí -->
+            </div>
+        </div>
+
         <!-- Vista de la pantalla principal -->
         <div id="main-view">
             <!-- Título y ID de usuario -->
             <h1 class="text-3xl sm:text-4xl font-bold text-indigo-800 text-center">🎶 Gestor de Ensayos</h1>
-            <div class="text-center text-sm text-gray-500 font-mono mt-2 mb-4">
-                ID de usuario: <span id="user-id" class="font-bold text-gray-700 break-all">Cargando...</span>
-            </div>
             
             <!-- Sección para añadir una nueva canción -->
             <div class="p-3 bg-indigo-100 rounded-2xl shadow-inner mb-6">
@@ -230,6 +259,36 @@
         </div>
     </div>
 
+    <!-- Modal para crear grupo -->
+    <div id="create-group-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-group-modal" class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Crear Nuevo Grupo</h2>
+            <form id="create-group-form">
+                <input type="text" id="new-group-name" placeholder="Nombre del grupo" required class="w-full p-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4">
+                <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-green-600">Crear</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para gestionar miembros -->
+    <div id="members-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <span id="close-members-modal" class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Gestionar Miembros de <span id="members-group-name"></span></h2>
+            
+            <div id="members-list" class="space-y-2 mb-4">
+                <!-- Member list will be rendered here -->
+            </div>
+
+            <form id="invite-member-form" class="flex flex-col space-y-3 border-t pt-4">
+                <h3 class="text-xl font-semibold text-indigo-700 mb-2">Invitar Nuevo Miembro</h3>
+                <input type="email" id="new-member-email" placeholder="Email del nuevo miembro..." required class="w-full p-2 rounded-xl border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-green-600">Invitar</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal para mensajes de error, información y alertas -->
     <div id="myModal" class="modal">
         <div class="modal-content">
@@ -248,8 +307,9 @@
     <script type="module">
         // Import the necessary Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, getDoc, setDoc, query, where, deleteDoc, updateDoc, deleteField, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         // Global variables provided by the canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -262,17 +322,35 @@
           appId: "1:676482708006:web:f3b4e522759c8df791ace7",
           measurementId: "G-4W2MHZX7N3"
         };
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db, auth, userId;
-        // Construct the base path for user-specific data to ensure persistence
-        const songsCollectionPath = `/artifacts/${appId}/users/`;
+        let db, auth, functions, userId;
+        let selectedGroupId = null;
+        let userGroups = [];
         let rehearsalIdToDelete = null;
         let songChart = null; // Variable for the chart instance
         let currentCalendarDate = new Date(); // New state for the calendar view
 
         // Get DOM elements
-        const userIdEl = document.getElementById('user-id');
+        const loginView = document.getElementById('login-view');
+        const mainContainer = document.getElementById('main-container');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userNameEl = document.getElementById('user-name');
+        const userEmailEl = document.getElementById('user-email');
+        const groupsSection = document.getElementById('groups-section');
+        const createGroupBtn = document.getElementById('create-group-btn');
+        const groupsList = document.getElementById('groups-list');
+        const createGroupModal = document.getElementById('create-group-modal');
+        const closeGroupModal = document.getElementById('close-group-modal');
+        const createGroupForm = document.getElementById('create-group-form');
+        const newGroupNameInput = document.getElementById('new-group-name');
+        const membersModal = document.getElementById('members-modal');
+        const closeMembersModal = document.getElementById('close-members-modal');
+        const membersGroupName = document.getElementById('members-group-name');
+        const membersList = document.getElementById('members-list');
+        const inviteMemberForm = document.getElementById('invite-member-form');
+        const newMemberEmailInput = document.getElementById('new-member-email');
+        
         const mainView = document.getElementById('main-view');
         const rehearsalView = document.getElementById('rehearsal-view');
         const singleSongHistoryView = document.getElementById('single-song-history-view');
@@ -351,9 +429,18 @@
         }
 
         closeButton.onclick = hideModal;
+        closeGroupModal.onclick = () => createGroupModal.style.display = 'none';
+        closeMembersModal.onclick = () => membersModal.style.display = 'none';
+
         window.onclick = function(event) {
             if (event.target == modal) {
                 hideModal();
+            }
+            if (event.target == createGroupModal) {
+                createGroupModal.style.display = 'none';
+            }
+            if (event.target == membersModal) {
+                membersModal.style.display = 'none';
             }
         }
         
@@ -367,57 +454,143 @@
         // Firebase Initialization
         async function initFirebase() {
             try {
-                // Ensure Firebase config is available before proceeding
-                if (Object.keys(firebaseConfig).length === 0) {
-                    throw new Error("Firebase config is not available. Check if the environment provides it.");
-                }
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                
-                // Sign in the user with the provided custom token, or anonymously if none is available
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
+                functions = getFunctions(app);
+
+                if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+                    console.log("Connecting to emulators");
+                    connectAuthEmulator(auth, "http://localhost:9099");
+                    connectFirestoreEmulator(db, "localhost", 8080);
+                    connectFunctionsEmulator(functions, "localhost", 5001);
                 }
                 
-                // Listen for authentication state changes to get the user ID
-                onAuthStateChanged(auth, (user) => {
+                onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         userId = user.uid;
-                        userIdEl.innerText = userId;
-                        // Start listening for real-time data after authentication
-                        listenForSongs();
-                        listenForRehearsalHistory();
+                        userNameEl.innerText = user.displayName || 'Usuario';
+                        userEmailEl.innerText = user.email;
+
+                        await saveUserToFirestore(user);
+
+                        loginView.classList.add('hidden');
+                        mainContainer.classList.remove('hidden');
+                        
+                        listenForGroups();
                         document.getElementById('rehearsal-date').valueAsDate = new Date();
                     } else {
-                        userIdEl.innerText = "Error de autenticación.";
-                        showMessage("Error de autenticación. Por favor, recargue la página.");
+                        userId = null;
+                        loginView.classList.remove('hidden');
+                        mainContainer.classList.add('hidden');
                     }
                 });
             } catch (error) {
-                console.error("Error al inicializar Firebase o autenticar:", error);
-                userIdEl.innerText = "Error.";
+                console.error("Error al inicializar Firebase:", error);
                 showMessage("Error al inicializar la aplicación. " + error.message);
             }
         }
 
+        async function saveUserToFirestore(user) {
+            const userRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userRef);
+            if (!userDoc.exists()) {
+                await setDoc(userRef, {
+                    name: user.displayName,
+                    email: user.email,
+                    createdAt: new Date()
+                });
+            }
+        }
+
         // --- Data Fetching and Rendering ---
-        
-        // Listen for all songs in the current user's collection
-        function listenForSongs() {
+
+        function listenForGroups() {
             if (!userId) return;
-            const songsCollectionRef = collection(db, `${songsCollectionPath}${userId}/songs`);
+            const groupsCollectionRef = collection(db, 'groups');
+            const q = query(groupsCollectionRef, where(`members.${userId}`, 'in', ['admin', 'reader']));
+
+            onSnapshot(q, (snapshot) => {
+                userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderGroups();
+                if (!selectedGroupId && userGroups.length > 0) {
+                    selectGroup(userGroups[0].id);
+                } else if (selectedGroupId) {
+                    // If a group was selected, re-render members modal if it's open
+                    if (membersModal.style.display === 'flex') {
+                        const group = userGroups.find(g => g.id === selectedGroupId);
+                        if (group) {
+                            openMembersModal(group.id, group.name);
+                        } else {
+                            // The group may have been deleted or the user removed
+                            membersModal.style.display = 'none';
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGroups() {
+            groupsList.innerHTML = '';
+            if (userGroups.length === 0) {
+                groupsList.innerHTML = `<p class="text-center text-gray-500">No perteneces a ningún grupo. ¡Crea uno!</p>`;
+                mainView.classList.add('hidden');
+            } else {
+                mainView.classList.remove('hidden');
+                userGroups.forEach(group => {
+                    const groupElWrapper = document.createElement('div');
+                    groupElWrapper.className = 'flex items-center space-x-2';
+
+                    const groupEl = document.createElement('button');
+                    groupEl.dataset.groupId = group.id;
+                    groupEl.textContent = group.name;
+                    groupEl.className = `w-full text-left p-2 rounded-lg font-semibold`;
+                    if (group.id === selectedGroupId) {
+                        groupEl.classList.add('bg-indigo-600', 'text-white');
+                    } else {
+                        groupEl.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-indigo-200');
+                    }
+                    groupEl.addEventListener('click', () => selectGroup(group.id));
+                    groupElWrapper.appendChild(groupEl);
+
+                    // Add manage button for admins
+                    if (group.members[userId] === 'admin') {
+                        const manageBtn = document.createElement('button');
+                        manageBtn.textContent = 'Gestionar';
+                        manageBtn.className = 'bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600';
+                        manageBtn.dataset.groupId = group.id;
+                        manageBtn.dataset.groupName = group.name;
+                        manageBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openMembersModal(group.id, group.name);
+                        });
+                        groupElWrapper.appendChild(manageBtn);
+                    }
+
+                    groupsList.appendChild(groupElWrapper);
+                });
+            }
+        }
+
+        function selectGroup(groupId) {
+            selectedGroupId = groupId;
+            renderGroups(); // Re-render to highlight the selected group
+            listenForSongs();
+            listenForRehearsalHistory();
+        }
+        
+        function listenForSongs() {
+            if (!selectedGroupId) return;
+            const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
             onSnapshot(songsCollectionRef, (snapshot) => {
                 allSongs = snapshot.docs.map(doc => ({ 
                     id: doc.id, 
                     name: doc.data().name,
-                    pdfLink: doc.data().pdfLink || null, // Capture the new PDF link
-                    videoLink: doc.data().videoLink || null // Capture the new video link
+                    pdfLink: doc.data().pdfLink || null,
+                    videoLink: doc.data().videoLink || null
                 }));
                 renderSongsForSelection();
-                renderSongsForHistory(); // Render the list for the history by song
+                renderSongsForHistory();
                 loadingSongs.classList.add('hidden');
                 loadingSongsClickable.classList.add('hidden');
             }, (error) => {
@@ -425,7 +598,6 @@
             });
         }
         
-        // Render songs in the new rehearsal form
         function renderSongsForSelection() {
             songsListCheckboxes.innerHTML = '';
             if (allSongs.length === 0) {
@@ -446,7 +618,6 @@
             }
         }
 
-        // Render songs for clickable history view
         function renderSongsForHistory() {
             songsListClickable.innerHTML = '';
             if (allSongs.length === 0) {
@@ -463,10 +634,9 @@
             }
         }
 
-        // Listen for rehearsal history
         function listenForRehearsalHistory() {
-            if (!userId) return;
-            const historyCollectionRef = collection(db, `${songsCollectionPath}${userId}/rehearsals`);
+            if (!selectedGroupId) return;
+            const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
             onSnapshot(historyCollectionRef, (snapshot) => {
                 allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderRehearsalHistory(allRehearsals);
@@ -482,7 +652,6 @@
                 rehearsalHistoryList.innerHTML = `<p class="text-center text-gray-500">Aún no hay ensayos registrados.</p>`;
                 return;
             }
-            // Sort by date descending
             rehearsals.sort((a, b) => new Date(b.date) - new Date(a.date));
             rehearsals.forEach(rehearsal => {
                 const songInfoHtml = rehearsal.songs.map(song => 
@@ -517,14 +686,12 @@
             });
         }
 
-        // Calculate average rating
         function calculateAverage(ratings) {
-            if (ratings.length === 0) return 0;
+            if (!ratings || ratings.length === 0) return 'N/A';
             const sum = ratings.reduce((total, rating) => total + rating, 0);
             return (sum / ratings.length).toFixed(2);
         }
 
-        // Render ratings and average for the current song
         function renderCurrentSongRatings(ratings) {
             currentSongRatingsListEl.innerHTML = '';
             if (ratings.length === 0) {
@@ -540,9 +707,213 @@
             currentSongAverageRatingEl.innerText = `Promedio: ${calculateAverage(ratings)}`;
         }
 
+        // --- Member Management ---
+        async function openMembersModal(groupId, groupName) {
+            membersGroupName.textContent = groupName;
+            membersModal.dataset.groupId = groupId;
+            
+            const group = userGroups.find(g => g.id === groupId);
+            if (!group) return;
+
+            membersList.innerHTML = '<div class="text-center text-gray-500 p-2">Cargando miembros...</div>';
+            
+            const memberUIDs = Object.keys(group.members);
+            const userDocs = await Promise.all(memberUIDs.map(uid => getDoc(doc(db, 'users', uid))));
+            const memberDetails = userDocs
+                .filter(doc => doc.exists())
+                .map(userDoc => ({
+                    uid: userDoc.id,
+                    ...userDoc.data()
+                }));
+
+            renderMembers(group, memberDetails);
+            membersModal.style.display = 'flex';
+        }
+
+        function renderMembers(group, memberDetails) {
+            membersList.innerHTML = '';
+            memberDetails.forEach(member => {
+                const memberEl = document.createElement('div');
+                memberEl.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-lg';
+                
+                const memberInfo = document.createElement('div');
+                memberInfo.className = 'text-left';
+                memberInfo.innerHTML = `
+                    <p class="font-semibold text-gray-800">${member.name || member.email}</p>
+                    <p class="text-sm text-gray-500">${member.email}</p>
+                `;
+
+                const memberActions = document.createElement('div');
+                memberActions.className = 'flex items-center space-x-2';
+
+                const roleSelect = document.createElement('select');
+                roleSelect.className = 'p-1 rounded-md border-gray-300';
+                roleSelect.dataset.uid = member.uid;
+                
+                const optionAdmin = document.createElement('option');
+                optionAdmin.value = 'admin';
+                optionAdmin.textContent = 'Admin';
+                if (group.members[member.uid] === 'admin') optionAdmin.selected = true;
+                
+                const optionReader = document.createElement('option');
+                optionReader.value = 'reader';
+                optionReader.textContent = 'Lector';
+                if (group.members[member.uid] === 'reader') optionReader.selected = true;
+
+                roleSelect.appendChild(optionAdmin);
+                roleSelect.appendChild(optionReader);
+                
+                if (group.owner === member.uid) {
+                    roleSelect.disabled = true;
+                }
+
+                roleSelect.addEventListener('change', (e) => {
+                    updateMemberRole(group.id, member.uid, e.target.value);
+                });
+
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600';
+                removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
+                
+                if (group.owner === member.uid) {
+                    removeBtn.disabled = true;
+                    removeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    removeBtn.addEventListener('click', () => {
+                        removeMember(group.id, member.uid);
+                    });
+                }
+
+                memberActions.appendChild(roleSelect);
+                memberActions.appendChild(removeBtn);
+                
+                memberEl.appendChild(memberInfo);
+                memberEl.appendChild(memberActions);
+                membersList.appendChild(memberEl);
+            });
+        }
+
+        async function updateMemberRole(groupId, memberUid, newRole) {
+            const groupRef = doc(db, 'groups', groupId);
+            try {
+                await updateDoc(groupRef, {
+                    [`members.${memberUid}`]: newRole
+                });
+                showMessage('Rol actualizado correctamente.');
+            } catch (error) {
+                console.error("Error updating role:", error);
+                showMessage('Error al actualizar el rol.');
+            }
+        }
+
+        async function removeMember(groupId, memberUid) {
+            const groupRef = doc(db, 'groups', groupId);
+            try {
+                await updateDoc(groupRef, {
+                    [`members.${memberUid}`]: deleteField()
+                });
+                showMessage('Miembro eliminado correctamente.');
+            } catch (error) {
+                console.error("Error removing member:", error);
+                showMessage('Error al eliminar el miembro.');
+            }
+        }
+
+        inviteMemberForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = newMemberEmailInput.value.trim();
+            const groupId = membersModal.dataset.groupId;
+            const user = auth.currentUser;
+
+            if (email && groupId && user) {
+                try {
+                    const idToken = await user.getIdToken();
+                    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+                    const projectId = firebaseConfig.projectId;
+                    const functionUrl = isLocal 
+                        ? `http://localhost:5001/${projectId}/us-central1/inviteUserToGroup`
+                        : `https://us-central1-${projectId}.cloudfunctions.net/inviteUserToGroup`;
+
+                    const response = await fetch(functionUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        body: JSON.stringify({ data: { email, groupId } })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error.message || 'An unknown error occurred.');
+                    }
+
+                    showMessage(result.data.message);
+                    newMemberEmailInput.value = '';
+                } catch (error) {
+                    console.error("Error inviting user:", error);
+                    showMessage(`Error: ${error.message}`);
+                }
+            }
+        });
+
         // --- Event Listeners and Logic ---
 
-        // Add a new song to the master list
+        loginBtn.addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Error durante el inicio de sesión con Google:", error);
+                showMessage("Error al iniciar sesión: " + error.message);
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error durante el cierre de sesión:", error);
+                showMessage("Error al cerrar sesión.");
+            }
+        });
+
+        createGroupBtn.addEventListener('click', () => {
+            createGroupModal.style.display = 'flex';
+        });
+
+        createGroupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const groupName = newGroupNameInput.value.trim();
+            if (groupName && userId) {
+                try {
+                    const groupsCollectionRef = collection(db, 'groups');
+                    await addDoc(groupsCollectionRef, {
+                        name: groupName,
+                        owner: userId,
+                        createdAt: new Date(),
+                        members: {
+                            [userId]: 'admin'
+                        }
+                    });
+                    newGroupNameInput.value = '';
+                    createGroupModal.style.display = 'none';
+                } catch (error) {
+                    console.error("Error creating group:", error);
+                    showMessage("Error al crear el grupo.");
+                }
+            }
+        });
+
+        groupsList.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button && !button.dataset.groupName) { // Ensure it's not the manage button
+                const groupId = button.dataset.groupId;
+                selectGroup(groupId);
+            }
+        });
+
         addSongForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const songName = newSongInput.value.trim();
@@ -553,17 +924,18 @@
                 showMessage("El nombre de la canción no puede estar vacío.");
                 return;
             }
-            if (!userId) {
-                showMessage("La aplicación se está inicializando. Por favor, espere.");
+            if (!userId || !selectedGroupId) {
+                showMessage("Debes seleccionar un grupo para añadir canciones.");
                 return;
             }
             try {
-                // Add the new song to the user's specific songs collection
-                const songsCollectionRef = collection(db, `${songsCollectionPath}${userId}/songs`);
+                const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
                 await addDoc(songsCollectionRef, { 
                     name: songName,
                     pdfLink: pdfLink,
-                    videoLink: videoLink
+                    videoLink: videoLink,
+                    createdBy: userId,
+                    createdAt: new Date()
                 });
                 newSongInput.value = '';
                 pdfLinkInput.value = '';
@@ -574,7 +946,6 @@
             }
         });
 
-        // Start a new rehearsal
         newRehearsalForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const date = document.getElementById('rehearsal-date').value;
@@ -596,7 +967,6 @@
                 return;
             }
 
-            // Set up the session state
             rehearsalSession.isActive = true;
             rehearsalSession.date = date;
             rehearsalSession.duration = duration;
@@ -606,18 +976,15 @@
             rehearsalSession.songTimeAllotted = (duration * 60) / selectedSongs.length;
             rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
             
-            // Render initial state for the first song
             renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
             renderSongLinks();
 
-            // Switch views and start the timer
             mainView.classList.add('hidden');
             rehearsalView.classList.remove('hidden');
             singleSongHistoryView.classList.add('hidden');
             startSongTimer();
         });
 
-        // Timer and song progression logic
         function startSongTimer() {
             if (rehearsalSession.timerInterval) {
                 clearInterval(rehearsalSession.timerInterval);
@@ -645,7 +1012,6 @@
             progressFillEl.style.width = `${Math.min(100, progressPercentage)}%`;
         }
 
-        // Render the PDF and video links for the current song
         function renderSongLinks() {
             songLinksContainer.innerHTML = '';
             const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
@@ -684,24 +1050,20 @@
             }
         }
         
-        // Add a rating to the current song and update the display
         rehearsalView.addEventListener('click', async (e) => {
             const button = e.target;
             if (button.classList.contains('rating-btn')) {
                 const rating = parseInt(button.dataset.rating, 10);
                 const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
                 currentSong.ratings.push(rating);
-                // Update the visualization of the latest rating
                 renderCurrentSongRatings(currentSong.ratings);
             }
         });
         
-        // Move to the next song
         nextSongBtn.addEventListener('click', () => {
             if (rehearsalSession.currentSongIndex < rehearsalSession.selectedSongs.length - 1) {
                 rehearsalSession.currentSongIndex++;
                 rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
-                // Render ratings and links for the new song
                 renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
                 renderSongLinks();
                 startSongTimer();
@@ -710,19 +1072,17 @@
             }
         });
 
-        // Finish and save the rehearsal session
         finishRehearsalBtn.addEventListener('click', async () => {
             if (rehearsalSession.timerInterval) {
                 clearInterval(rehearsalSession.timerInterval);
             }
-            if (!userId) {
+            if (!userId || !selectedGroupId) {
                 showMessage("Error. La sesión no se puede guardar. Por favor, recargue la página.");
                 return;
             }
 
             try {
-                // Save the rehearsal data to the user's specific collection
-                const rehearsalsCollectionRef = collection(db, `${songsCollectionPath}${userId}/rehearsals`);
+                const rehearsalsCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
                 const songsToSave = rehearsalSession.selectedSongs.map(song => ({
                     name: song.name,
                     ratings: song.ratings,
@@ -732,14 +1092,14 @@
                     date: rehearsalSession.date,
                     duration: rehearsalSession.duration,
                     songs: songsToSave,
-                    timestamp: new Date()
+                    timestamp: new Date(),
+                    userId: userId
                 });
             } catch (e) {
                 console.error("Error saving the rehearsal:", e);
                 showMessage("Error al guardar el ensayo. Por favor, vuelva a intentarlo.");
             }
 
-            // Reset state and switch back to main view
             rehearsalSession.isActive = false;
             rehearsalSession.currentSongIndex = 0;
             rehearsalSession.songTimeRemaining = 0;
@@ -749,7 +1109,6 @@
             singleSongHistoryView.classList.add('hidden');
         });
         
-        // Handle deletion of a rehearsal
         rehearsalHistoryList.addEventListener('click', async (e) => {
             const button = e.target.closest('.delete-rehearsal-btn');
             if (button) {
@@ -758,18 +1117,16 @@
             }
         });
 
-        // Handle confirmation for deletion
         confirmDeleteBtn.addEventListener('click', async () => {
             if (!rehearsalIdToDelete) return;
             
-            if (!userId) {
+            if (!userId || !selectedGroupId) {
                 showMessage("Error. No se puede eliminar el ensayo. Por favor, recargue la página.");
                 return;
             }
             
             try {
-                // Delete the document from the user's specific collection
-                const rehearsalDocRef = doc(db, `${songsCollectionPath}${userId}/rehearsals`, rehearsalIdToDelete);
+                const rehearsalDocRef = doc(db, `groups/${selectedGroupId}/rehearsals`, rehearsalIdToDelete);
                 await deleteDoc(rehearsalDocRef);
                 showMessage("Ensayo eliminado con éxito.");
             } catch (e) {
@@ -781,12 +1138,10 @@
             }
         });
 
-        // Handle cancellation of deletion
         cancelDeleteBtn.addEventListener('click', () => {
             hideModal();
         });
 
-        // Show single song history
         songsListClickable.addEventListener('click', (e) => {
             const button = e.target.closest('button');
             if (button) {
@@ -801,13 +1156,6 @@
             rehearsalView.classList.add('hidden');
             singleSongHistoryView.classList.remove('hidden');
             
-            // Set default view to chart and update button
-            chartView.classList.remove('hidden');
-            calendarView.classList.add('hidden');
-            chartIcon.classList.remove('hidden');
-            calendarIcon.classList.add('hidden');
-
-            // If a chart instance already exists, destroy it to prevent errors
             if (songChart) {
                 songChart.destroy();
             }
@@ -832,9 +1180,8 @@
             let ratingCount = 0;
             const chartLabels = [];
             const chartData = [];
-            const ratingsByDate = {}; // New map to store ratings for the calendar
+            const ratingsByDate = {};
 
-            // Sort by date ascending to show correct timeline in the chart
             relevantEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
 
             relevantEntries.forEach(entry => {
@@ -843,7 +1190,6 @@
                 ratingCount += entry.ratings.length;
                 ratingsByDate[entry.date] = average;
 
-                // Prepare data for the chart
                 chartLabels.push(entry.date);
                 chartData.push(parseFloat(average));
 
@@ -857,7 +1203,6 @@
                 songHistoryList.appendChild(rehearsalEntry);
             });
 
-            // Create the chart
             const ctx = document.getElementById('song-history-chart').getContext('2d');
             songChart = new Chart(ctx, {
                 type: 'line',
@@ -880,60 +1225,28 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 5,
-                            title: {
-                                display: true,
-                                text: 'Calificación',
-                                font: {
-                                    weight: 'bold'
-                                }
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Fecha del Ensayo',
-                                font: {
-                                    weight: 'bold'
-                                }
-                            }
-                        }
+                        y: { beginAtZero: true, max: 5, title: { display: true, text: 'Calificación', font: { weight: 'bold' } } },
+                        x: { title: { display: true, text: 'Fecha del Ensayo', font: { weight: 'bold' } } }
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
 
             const overallAverage = ratingCount > 0 ? (totalRating / ratingCount).toFixed(2) : '0.00';
             songHistoryAverage.innerText = overallAverage;
             
-            // Render the initial calendar
             currentCalendarDate = new Date();
             renderCalendar(ratingsByDate);
         }
 
-        // Toggles between chart and calendar views
         toggleViewBtn.addEventListener('click', () => {
             const isChartView = !chartView.classList.contains('hidden');
-            if (isChartView) {
-                chartView.classList.add('hidden');
-                calendarView.classList.remove('hidden');
-                chartIcon.classList.add('hidden');
-                calendarIcon.classList.remove('hidden');
-            } else {
-                calendarView.classList.add('hidden');
-                chartView.classList.remove('hidden');
-                calendarIcon.classList.add('hidden');
-                chartIcon.classList.remove('hidden');
-            }
+            chartView.classList.toggle('hidden', isChartView);
+            calendarView.classList.toggle('hidden', !isChartView);
+            chartIcon.classList.toggle('hidden', isChartView);
+            calendarIcon.classList.toggle('hidden', !isChartView);
         });
 
-        // Renders the calendar grid
         function renderCalendar(ratingsData) {
             calendarGrid.innerHTML = '';
             const year = currentCalendarDate.getFullYear();
@@ -944,26 +1257,18 @@
             const firstDayOfMonth = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Add empty cells for padding at the beginning of the month
             for (let i = 0; i < firstDayOfMonth; i++) {
-                const emptyCell = document.createElement('div');
-                emptyCell.classList.add('p-2', 'rounded-xl', 'text-center');
-                calendarGrid.appendChild(emptyCell);
+                calendarGrid.appendChild(document.createElement('div'));
             }
 
-            // Add day cells
             for (let day = 1; day <= daysInMonth; day++) {
                 const cell = document.createElement('div');
                 cell.classList.add('p-2', 'rounded-xl', 'text-center', 'font-bold', 'flex', 'flex-col', 'items-center', 'justify-center', 'shadow-inner');
-                
                 const currentDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 
                 if (ratingsData[currentDate]) {
                     cell.classList.add('bg-indigo-200');
-                    cell.innerHTML = `
-                        <span class="text-sm text-gray-800">${day}</span>
-                        <span class="text-xs text-indigo-700 font-semibold mt-1">${ratingsData[currentDate]}</span>
-                    `;
+                    cell.innerHTML = `<span class="text-sm text-gray-800">${day}</span><span class="text-xs text-indigo-700 font-semibold mt-1">${ratingsData[currentDate]}</span>`;
                 } else {
                     cell.classList.add('bg-gray-100', 'text-gray-400');
                     cell.innerHTML = `<span class="text-sm">${day}</span>`;
@@ -972,9 +1277,8 @@
             }
         }
 
-        // Handle calendar month navigation
-        prevMonthBtn.addEventListener('click', () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+        function navigateCalendar(offset) {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
             const songName = songHistoryTitle.innerText;
             const relevantEntries = allRehearsals
                 .map(rehearsal => {
@@ -987,31 +1291,16 @@
                 ratingsByDate[entry.date] = calculateAverage(entry.ratings);
             });
             renderCalendar(ratingsByDate);
-        });
+        }
 
-        nextMonthBtn.addEventListener('click', () => {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-            const songName = songHistoryTitle.innerText;
-            const relevantEntries = allRehearsals
-                .map(rehearsal => {
-                    const songEntry = rehearsal.songs.find(s => s.name === songName);
-                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
-                })
-                .filter(entry => entry !== null);
-            const ratingsByDate = {};
-            relevantEntries.forEach(entry => {
-                ratingsByDate[entry.date] = calculateAverage(entry.ratings);
-            });
-            renderCalendar(ratingsByDate);
-        });
+        prevMonthBtn.addEventListener('click', () => navigateCalendar(-1));
+        nextMonthBtn.addEventListener('click', () => navigateCalendar(1));
         
-        // Back to main view
         backToMainBtn.addEventListener('click', () => {
             singleSongHistoryView.classList.add('hidden');
             mainView.classList.remove('hidden');
         });
 
-        // Initialize the app on page load
         window.onload = initFirebase;
     </script>
 </body>
