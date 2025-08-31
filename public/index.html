@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Ensayos</title>
+    <!-- Incluir la fuente Inter de Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Incluir el CDN de Tailwind CSS para un diseño moderno y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluir el CDN de Chart.js para gráficos estadísticos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 24px;
+            border-radius: 1rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .close-button {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4f46e5;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body class="bg-indigo-50 flex flex-col items-center min-h-screen p-4">
+
+    <!-- Contenedor principal de la aplicación -->
+    <div id="main-container" class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-2xl w-full space-y-6 md:space-y-8 mt-6">
+        
+        <!-- Vista de la pantalla principal -->
+        <div id="main-view">
+            <!-- Título y ID de usuario -->
+            <h1 class="text-3xl sm:text-4xl font-bold text-indigo-800 text-center">🎶 Gestor de Ensayos</h1>
+            <div class="text-center text-sm text-gray-500 font-mono mt-2 mb-4">
+                ID de usuario: <span id="user-id" class="font-bold text-gray-700 break-all">Cargando...</span>
+            </div>
+            
+            <!-- Sección para añadir una nueva canción -->
+            <div class="p-3 bg-indigo-100 rounded-2xl shadow-inner mb-6">
+                <h2 class="text-xl font-semibold text-indigo-700 mb-2">Añadir Nueva Canción</h2>
+                <form id="add-song-form" class="flex flex-col space-y-3">
+                    <input type="text" id="new-song-input" placeholder="Nombre de la canción..." required
+                           class="w-full p-2 rounded-xl border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <input type="url" id="pdf-link-input" placeholder="Enlace a la Partitura (PDF)..." 
+                           class="w-full p-2 rounded-xl border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <input type="url" id="video-link-input" placeholder="Enlace al Video..." 
+                           class="w-full p-2 rounded-xl border border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 px-5 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md">
+                        Añadir
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Sección para iniciar un nuevo ensayo -->
+            <div class="p-4 bg-purple-100 rounded-2xl shadow-inner mb-6">
+                <h2 class="text-xl font-semibold text-purple-700 mb-3">Iniciar Nuevo Ensayo</h2>
+                <form id="new-rehearsal-form" class="space-y-4">
+                    <div>
+                        <label for="rehearsal-date" class="block text-gray-700 font-semibold mb-1">Fecha:</label>
+                        <input type="date" id="rehearsal-date" required class="w-full p-2 rounded-xl border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label for="rehearsal-duration" class="block text-gray-700 font-semibold mb-1">Duración (minutos):</label>
+                        <input type="number" id="rehearsal-duration" min="1" value="60" required class="w-full p-2 rounded-xl border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-1">Seleccionar Temas:</label>
+                        <div id="songs-list-checkboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-purple-50 rounded-lg">
+                            <div id="loading-songs" class="text-center text-gray-500 p-2">Cargando temas...</div>
+                        </div>
+                    </div>
+                    <button type="submit" id="start-rehearsal-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-purple-700 shadow-md">
+                        Comenzar Ensayo
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Sección para ver el historial por tema -->
+            <div>
+                <h2 class="text-xl font-semibold text-indigo-700 mb-2">Historial por Tema</h2>
+                <div id="songs-list-clickable" class="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-indigo-50 rounded-lg">
+                    <div id="loading-songs-clickable" class="text-center text-gray-500 p-2">Cargando temas...</div>
+                </div>
+            </div>
+
+            <!-- Lista de ensayos pasados -->
+            <div class="mt-6">
+                <h2 class="text-xl font-semibold text-indigo-700 mb-2">Historial de Ensayos</h2>
+                <div id="rehearsal-history-list" class="space-y-2">
+                    <div id="loading-history" class="text-center text-gray-500 p-4">Cargando historial...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vista del historial de una sola canción -->
+        <div id="single-song-history-view" class="hidden">
+            <button id="back-to-main-btn" class="flex items-center text-indigo-600 font-bold mb-4 hover:underline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-left mr-1">
+                    <path d="M19 12H5"/>
+                    <path d="m12 19-7-7 7-7"/>
+                </svg>
+                Volver
+            </button>
+            <div class="flex items-center justify-between mb-2">
+                <h2 id="song-history-title" class="text-3xl sm:text-4xl font-bold text-indigo-800"></h2>
+                <button id="toggle-view-btn" class="p-2 bg-indigo-100 rounded-full shadow-md transition-transform transform hover:scale-110">
+                    <svg id="chart-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-area-chart">
+                        <path d="M3 3v18h18"/>
+                        <path d="M7 15l4-5 4 5 4-5"/>
+                    </svg>
+                    <svg id="calendar-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar">
+                        <path d="M8 2v4"/>
+                        <path d="M16 2v4"/>
+                        <rect width="18" height="18" x="3" y="4" rx="2"/>
+                        <path d="M3 10h18"/>
+                    </svg>
+                </button>
+            </div>
+            <p id="song-history-average" class="text-xl text-gray-600 font-semibold text-center mb-6">Promedio General: <span class="font-bold text-purple-600"></span></p>
+            
+            <!-- Contenedor del gráfico para el historial de la canción (vista por defecto) -->
+            <div id="chart-view" class="p-4 bg-white rounded-xl shadow-inner my-6 h-80">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2 text-center">Rendimiento Histórico</h3>
+                <canvas id="song-history-chart"></canvas>
+            </div>
+
+            <!-- Contenedor del calendario (inicialmente oculto) -->
+            <div id="calendar-view" class="hidden p-4 bg-white rounded-xl shadow-inner my-6">
+                <div class="flex items-center justify-between mb-4">
+                    <button id="prev-month-btn" class="p-2 bg-indigo-200 rounded-full hover:bg-indigo-300 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
+                    </button>
+                    <h3 id="current-month-display" class="text-xl font-semibold text-gray-800"></h3>
+                    <button id="next-month-btn" class="p-2 bg-indigo-200 rounded-full hover:bg-indigo-300 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-2 text-center text-sm font-semibold text-gray-600 mb-2">
+                    <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                    <!-- Los días del calendario se renderizarán aquí -->
+                </div>
+            </div>
+            
+            <div id="song-history-list" class="space-y-4">
+                <!-- El historial se renderizará aquí -->
+            </div>
+        </div>
+
+        <!-- Vista del ensayo en curso -->
+        <div id="rehearsal-view" class="hidden text-center space-y-6">
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-800">Ensayando:</h2>
+            <h3 id="current-song-title" class="text-4xl sm:text-5xl font-extrabold text-purple-700"></h3>
+            
+            <!-- Sección de enlaces a recursos -->
+            <div id="song-links" class="flex justify-center space-x-4 mb-4">
+                <!-- Los botones para PDF y video se insertarán aquí -->
+            </div>
+            
+            <div class="space-y-2">
+                <div id="song-timer" class="text-5xl font-mono font-bold text-gray-800"></div>
+                <div class="progress-bar w-full">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <p id="total-time-display" class="text-sm text-gray-500 font-mono"></p>
+            </div>
+
+            <p class="text-xl font-semibold text-gray-700">Califica tu rendimiento:</p>
+            <div class="flex justify-center space-x-3 sm:space-x-4">
+                <button data-rating="1" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-red-400 hover:text-white transition-colors">1</button>
+                <button data-rating="2" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-orange-400 hover:text-white transition-colors">2</button>
+                <button data-rating="3" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-yellow-400 hover:text-white transition-colors">3</button>
+                <button data-rating="4" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-lime-400 hover:text-white transition-colors">4</button>
+                <button data-rating="5" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-green-400 hover:text-white transition-colors">5</button>
+            </div>
+            
+            <!-- Nuevo elemento para mostrar todas las calificaciones y el promedio -->
+            <div class="mt-4 p-4 bg-gray-100 rounded-xl shadow-inner">
+                <h4 class="text-lg font-semibold text-gray-700 mb-2">Calificaciones para este tema:</h4>
+                <div id="current-song-ratings-list" class="flex flex-wrap justify-center gap-2 mb-2">
+                    <!-- Las calificaciones se renderizarán aquí -->
+                </div>
+                <p id="current-song-average-rating" class="text-lg font-bold text-gray-800">Promedio: -</p>
+            </div>
+
+
+            <button id="next-song-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md">
+                Siguiente Tema
+            </button>
+            <button id="finish-rehearsal-btn" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-red-700 shadow-md">
+                Terminar Ensayo
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para mensajes de error, información y alertas -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-content-body">
+                <p id="modal-message" class="text-lg text-gray-700 mb-4"></p>
+                <div id="modal-buttons" class="flex justify-center space-x-4 hidden">
+                    <button id="confirm-delete-btn" class="bg-red-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-red-600">Sí, eliminar</button>
+                    <button id="cancel-delete-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-xl transition-colors hover:bg-gray-400">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Script de Firebase y lógica de la aplicación -->
+    <script type="module">
+        // Import the necessary Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = {
+          apiKey: "AIzaSyC5jn2BfYU8uj-uqJ6XaUjfBSpwYWY6nF0",
+          authDomain: "gig-log-14233.firebaseapp.com",
+          projectId: "gig-log-14233",
+          storageBucket: "gig-log-14233.firebasestorage.app",
+          messagingSenderId: "676482708006",
+          appId: "1:676482708006:web:f3b4e522759c8df791ace7",
+          measurementId: "G-4W2MHZX7N3"
+        };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId;
+        // Construct the base path for user-specific data to ensure persistence
+        const songsCollectionPath = `/artifacts/${appId}/users/`;
+        let rehearsalIdToDelete = null;
+        let songChart = null; // Variable for the chart instance
+        let currentCalendarDate = new Date(); // New state for the calendar view
+
+        // Get DOM elements
+        const userIdEl = document.getElementById('user-id');
+        const mainView = document.getElementById('main-view');
+        const rehearsalView = document.getElementById('rehearsal-view');
+        const singleSongHistoryView = document.getElementById('single-song-history-view');
+        const backToMainBtn = document.getElementById('back-to-main-btn');
+        const addSongForm = document.getElementById('add-song-form');
+        const newSongInput = document.getElementById('new-song-input');
+        const pdfLinkInput = document.getElementById('pdf-link-input');
+        const videoLinkInput = document.getElementById('video-link-input');
+        const newRehearsalForm = document.getElementById('new-rehearsal-form');
+        const songsListCheckboxes = document.getElementById('songs-list-checkboxes');
+        const songsListClickable = document.getElementById('songs-list-clickable');
+        const startRehearsalBtn = document.getElementById('start-rehearsal-btn');
+        const rehearsalHistoryList = document.getElementById('rehearsal-history-list');
+        const songHistoryList = document.getElementById('song-history-list');
+        const songHistoryTitle = document.getElementById('song-history-title');
+        const songHistoryAverage = document.getElementById('song-history-average').querySelector('span');
+        const loadingSongs = document.getElementById('loading-songs');
+        const loadingSongsClickable = document.getElementById('loading-songs-clickable');
+        const loadingHistory = document.getElementById('loading-history');
+        const currentSongTitleEl = document.getElementById('current-song-title');
+        const songLinksContainer = document.getElementById('song-links');
+        const songTimerEl = document.getElementById('song-timer');
+        const totalTimeDisplayEl = document.getElementById('total-time-display');
+        const nextSongBtn = document.getElementById('next-song-btn');
+        const finishRehearsalBtn = document.getElementById('finish-rehearsal-btn');
+        const progressFillEl = document.getElementById('progress-fill');
+        const currentSongRatingsListEl = document.getElementById('current-song-ratings-list');
+        const currentSongAverageRatingEl = document.getElementById('current-song-average-rating');
+        const modal = document.getElementById('myModal');
+        const modalMessage = document.getElementById('modal-message');
+        const modalButtons = document.getElementById('modal-buttons');
+        const closeButton = document.querySelector('.close-button');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const toggleViewBtn = document.getElementById('toggle-view-btn');
+        const chartView = document.getElementById('chart-view');
+        const calendarView = document.getElementById('calendar-view');
+        const calendarIcon = document.getElementById('calendar-icon');
+        const chartIcon = document.getElementById('chart-icon');
+        const prevMonthBtn = document.getElementById('prev-month-btn');
+        const nextMonthBtn = document.getElementById('next-month-btn');
+        const currentMonthDisplay = document.getElementById('current-month-display');
+        const calendarGrid = document.getElementById('calendar-grid');
+
+
+        // Rehearsal session state
+        let allSongs = [];
+        let allRehearsals = []; // New variable to store all rehearsals
+        let rehearsalSession = {
+            isActive: false,
+            date: null,
+            duration: 0,
+            selectedSongs: [],
+            currentSongIndex: 0,
+            songTimeAllotted: 0,
+            timerInterval: null,
+            songTimeRemaining: 0,
+            totalTimeElapsed: 0,
+            ratings: []
+        };
+        
+        // Modal functions
+        function showMessage(message, isConfirmation = false) {
+            modalMessage.innerText = message;
+            if (isConfirmation) {
+                modalButtons.classList.remove('hidden');
+            } else {
+                modalButtons.classList.add('hidden');
+            }
+            modal.style.display = 'flex';
+        }
+
+        function hideModal() {
+            modal.style.display = 'none';
+            rehearsalIdToDelete = null;
+        }
+
+        closeButton.onclick = hideModal;
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                hideModal();
+            }
+        }
+        
+        // Timer formatting
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        // Firebase Initialization
+        async function initFirebase() {
+            try {
+                // Ensure Firebase config is available before proceeding
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase config is not available. Check if the environment provides it.");
+                }
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                // Sign in the user with the provided custom token, or anonymously if none is available
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                
+                // Listen for authentication state changes to get the user ID
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdEl.innerText = userId;
+                        // Start listening for real-time data after authentication
+                        listenForSongs();
+                        listenForRehearsalHistory();
+                        document.getElementById('rehearsal-date').valueAsDate = new Date();
+                    } else {
+                        userIdEl.innerText = "Error de autenticación.";
+                        showMessage("Error de autenticación. Por favor, recargue la página.");
+                    }
+                });
+            } catch (error) {
+                console.error("Error al inicializar Firebase o autenticar:", error);
+                userIdEl.innerText = "Error.";
+                showMessage("Error al inicializar la aplicación. " + error.message);
+            }
+        }
+
+        // --- Data Fetching and Rendering ---
+        
+        // Listen for all songs in the current user's collection
+        function listenForSongs() {
+            if (!userId) return;
+            const songsCollectionRef = collection(db, `${songsCollectionPath}${userId}/songs`);
+            onSnapshot(songsCollectionRef, (snapshot) => {
+                allSongs = snapshot.docs.map(doc => ({ 
+                    id: doc.id, 
+                    name: doc.data().name,
+                    pdfLink: doc.data().pdfLink || null, // Capture the new PDF link
+                    videoLink: doc.data().videoLink || null // Capture the new video link
+                }));
+                renderSongsForSelection();
+                renderSongsForHistory(); // Render the list for the history by song
+                loadingSongs.classList.add('hidden');
+                loadingSongsClickable.classList.add('hidden');
+            }, (error) => {
+                console.error("Error listening for songs:", error);
+            });
+        }
+        
+        // Render songs in the new rehearsal form
+        function renderSongsForSelection() {
+            songsListCheckboxes.innerHTML = '';
+            if (allSongs.length === 0) {
+                songsListCheckboxes.innerHTML = `<p class="text-center text-gray-500">Añade temas para empezar.</p>`;
+            } else {
+                allSongs.forEach(song => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" name="selected-song" value="${song.id}" data-name="${song.name}" 
+                                   data-pdf-link="${song.pdfLink || ''}" data-video-link="${song.videoLink || ''}" 
+                                   class="rounded text-purple-600 focus:ring-purple-500">
+                            <span class="ml-2 text-gray-800">${song.name}</span>
+                        </label>
+                    `;
+                    songsListCheckboxes.appendChild(div);
+                });
+            }
+        }
+
+        // Render songs for clickable history view
+        function renderSongsForHistory() {
+            songsListClickable.innerHTML = '';
+            if (allSongs.length === 0) {
+                songsListClickable.innerHTML = `<p class="text-center text-gray-500">Añade temas para ver el historial.</p>`;
+            } else {
+                allSongs.forEach(song => {
+                    const button = document.createElement('button');
+                    button.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'text-left', 'hover:bg-indigo-200', 'transition-colors');
+                    button.dataset.songId = song.id;
+                    button.dataset.songName = song.name;
+                    button.innerHTML = `<span class="font-semibold text-gray-800">${song.name}</span>`;
+                    songsListClickable.appendChild(button);
+                });
+            }
+        }
+
+        // Listen for rehearsal history
+        function listenForRehearsalHistory() {
+            if (!userId) return;
+            const historyCollectionRef = collection(db, `${songsCollectionPath}${userId}/rehearsals`);
+            onSnapshot(historyCollectionRef, (snapshot) => {
+                allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderRehearsalHistory(allRehearsals);
+                loadingHistory.classList.add('hidden');
+            }, (error) => {
+                console.error("Error listening for rehearsal history:", error);
+            });
+        }
+
+        function renderRehearsalHistory(rehearsals) {
+            rehearsalHistoryList.innerHTML = '';
+            if (rehearsals.length === 0) {
+                rehearsalHistoryList.innerHTML = `<p class="text-center text-gray-500">Aún no hay ensayos registrados.</p>`;
+                return;
+            }
+            // Sort by date descending
+            rehearsals.sort((a, b) => new Date(b.date) - new Date(a.date));
+            rehearsals.forEach(rehearsal => {
+                const songInfoHtml = rehearsal.songs.map(song => 
+                    `<div class="text-sm font-medium text-gray-700">${song.name} (${calculateAverage(song.ratings)})</div>`
+                ).join('');
+
+                const rehearsalEl = document.createElement('div');
+                rehearsalEl.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'flex', 'flex-col', 'space-y-2');
+                rehearsalEl.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-base font-semibold text-gray-800">
+                                Ensayo del ${rehearsal.date}
+                                <span class="text-sm text-gray-500 font-normal">(${rehearsal.duration} min)</span>
+                            </p>
+                        </div>
+                        <button data-id="${rehearsal.id}" class="delete-rehearsal-btn bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                <line x1="10" x2="10" y1="11" y2="17"/>
+                                <line x1="14" x2="14" y1="11" y2="17"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex flex-col space-y-1 mt-2">
+                        ${songInfoHtml}
+                    </div>
+                `;
+                rehearsalHistoryList.appendChild(rehearsalEl);
+            });
+        }
+
+        // Calculate average rating
+        function calculateAverage(ratings) {
+            if (ratings.length === 0) return 0;
+            const sum = ratings.reduce((total, rating) => total + rating, 0);
+            return (sum / ratings.length).toFixed(2);
+        }
+
+        // Render ratings and average for the current song
+        function renderCurrentSongRatings(ratings) {
+            currentSongRatingsListEl.innerHTML = '';
+            if (ratings.length === 0) {
+                currentSongRatingsListEl.innerHTML = '<span class="text-gray-500">Sin calificaciones aún.</span>';
+            } else {
+                ratings.forEach(rating => {
+                    const ratingSpan = document.createElement('span');
+                    ratingSpan.classList.add('bg-gray-200', 'text-gray-700', 'font-bold', 'px-3', 'py-1', 'rounded-full');
+                    ratingSpan.innerText = rating;
+                    currentSongRatingsListEl.appendChild(ratingSpan);
+                });
+            }
+            currentSongAverageRatingEl.innerText = `Promedio: ${calculateAverage(ratings)}`;
+        }
+
+        // --- Event Listeners and Logic ---
+
+        // Add a new song to the master list
+        addSongForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const songName = newSongInput.value.trim();
+            const pdfLink = pdfLinkInput.value.trim();
+            const videoLink = videoLinkInput.value.trim();
+
+            if (songName === "") {
+                showMessage("El nombre de la canción no puede estar vacío.");
+                return;
+            }
+            if (!userId) {
+                showMessage("La aplicación se está inicializando. Por favor, espere.");
+                return;
+            }
+            try {
+                // Add the new song to the user's specific songs collection
+                const songsCollectionRef = collection(db, `${songsCollectionPath}${userId}/songs`);
+                await addDoc(songsCollectionRef, { 
+                    name: songName,
+                    pdfLink: pdfLink,
+                    videoLink: videoLink
+                });
+                newSongInput.value = '';
+                pdfLinkInput.value = '';
+                videoLinkInput.value = '';
+            } catch (e) {
+                console.error("Error al añadir la canción:", e);
+                showMessage("Error al añadir la canción. Intente de nuevo.");
+            }
+        });
+
+        // Start a new rehearsal
+        newRehearsalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const date = document.getElementById('rehearsal-date').value;
+            const duration = parseInt(document.getElementById('rehearsal-duration').value, 10);
+            const selectedSongs = Array.from(document.querySelectorAll('input[name="selected-song"]:checked')).map(cb => ({
+                id: cb.value,
+                name: cb.dataset.name,
+                pdfLink: cb.dataset.pdfLink,
+                videoLink: cb.dataset.videoLink,
+                ratings: []
+            }));
+
+            if (selectedSongs.length === 0) {
+                showMessage("Debes seleccionar al menos un tema para el ensayo.");
+                return;
+            }
+            if (duration <= 0) {
+                showMessage("La duración del ensayo debe ser al menos 1 minuto.");
+                return;
+            }
+
+            // Set up the session state
+            rehearsalSession.isActive = true;
+            rehearsalSession.date = date;
+            rehearsalSession.duration = duration;
+            rehearsalSession.selectedSongs = selectedSongs;
+            rehearsalSession.currentSongIndex = 0;
+            rehearsalSession.totalTimeElapsed = 0;
+            rehearsalSession.songTimeAllotted = (duration * 60) / selectedSongs.length;
+            rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
+            
+            // Render initial state for the first song
+            renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
+            renderSongLinks();
+
+            // Switch views and start the timer
+            mainView.classList.add('hidden');
+            rehearsalView.classList.remove('hidden');
+            singleSongHistoryView.classList.add('hidden');
+            startSongTimer();
+        });
+
+        // Timer and song progression logic
+        function startSongTimer() {
+            if (rehearsalSession.timerInterval) {
+                clearInterval(rehearsalSession.timerInterval);
+            }
+            updateRehearsalDisplay();
+            
+            rehearsalSession.timerInterval = setInterval(() => {
+                rehearsalSession.songTimeRemaining--;
+                rehearsalSession.totalTimeElapsed++;
+                updateRehearsalDisplay();
+                
+                if (rehearsalSession.songTimeRemaining <= 0) {
+                    clearInterval(rehearsalSession.timerInterval);
+                    showMessage("¡Tiempo terminado para este tema! Presiona Siguiente para continuar.");
+                }
+            }, 1000);
+        }
+
+        function updateRehearsalDisplay() {
+            const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
+            currentSongTitleEl.innerText = currentSong.name;
+            songTimerEl.innerText = formatTime(rehearsalSession.songTimeRemaining);
+            totalTimeDisplayEl.innerText = `Tiempo total transcurrido: ${formatTime(rehearsalSession.totalTimeElapsed)}`;
+            const progressPercentage = (rehearsalSession.songTimeAllotted - rehearsalSession.songTimeRemaining) / rehearsalSession.songTimeAllotted * 100;
+            progressFillEl.style.width = `${Math.min(100, progressPercentage)}%`;
+        }
+
+        // Render the PDF and video links for the current song
+        function renderSongLinks() {
+            songLinksContainer.innerHTML = '';
+            const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
+
+            if (currentSong.pdfLink) {
+                const pdfButton = document.createElement('a');
+                pdfButton.href = currentSong.pdfLink;
+                pdfButton.target = "_blank";
+                pdfButton.classList.add('flex', 'items-center', 'space-x-2', 'bg-red-500', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-xl', 'transition-transform', 'transform', 'hover:scale-105', 'hover:bg-red-600', 'shadow-md');
+                pdfButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text">
+                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                        <path d="M10 9H8"/>
+                        <path d="M16 13H8"/>
+                        <path d="M16 17H8"/>
+                    </svg>
+                    <span>Partitura</span>
+                `;
+                songLinksContainer.appendChild(pdfButton);
+            }
+
+            if (currentSong.videoLink) {
+                const videoButton = document.createElement('a');
+                videoButton.href = currentSong.videoLink;
+                videoButton.target = "_blank";
+                videoButton.classList.add('flex', 'items-center', 'space-x-2', 'bg-blue-500', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-xl', 'transition-transform', 'transform', 'hover:scale-105', 'hover:bg-blue-600', 'shadow-md');
+                videoButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-youtube">
+                        <path d="M2.5 17a2.41 2.41 0 0 1-1.48-2.75 6.96 6.96 0 0 1-.22-2.11 6.13 6.13 0 0 1 .22-2.11A2.41 2.41 0 0 1 2.5 7h19a2.41 2.41 0 0 1 1.48 2.75 6.13 6.13 0 0 1-.22 2.11 6.96 6.96 0 0 1 .22 2.11A2.41 2.41 0 0 1 21.5 17Z"/>
+                        <path d="m10 12 5 3-5 3z"/>
+                    </svg>
+                    <span>Video</span>
+                `;
+                songLinksContainer.appendChild(videoButton);
+            }
+        }
+        
+        // Add a rating to the current song and update the display
+        rehearsalView.addEventListener('click', async (e) => {
+            const button = e.target;
+            if (button.classList.contains('rating-btn')) {
+                const rating = parseInt(button.dataset.rating, 10);
+                const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
+                currentSong.ratings.push(rating);
+                // Update the visualization of the latest rating
+                renderCurrentSongRatings(currentSong.ratings);
+            }
+        });
+        
+        // Move to the next song
+        nextSongBtn.addEventListener('click', () => {
+            if (rehearsalSession.currentSongIndex < rehearsalSession.selectedSongs.length - 1) {
+                rehearsalSession.currentSongIndex++;
+                rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
+                // Render ratings and links for the new song
+                renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
+                renderSongLinks();
+                startSongTimer();
+            } else {
+                showMessage("Has completado todos los temas. Puedes terminar el ensayo.");
+            }
+        });
+
+        // Finish and save the rehearsal session
+        finishRehearsalBtn.addEventListener('click', async () => {
+            if (rehearsalSession.timerInterval) {
+                clearInterval(rehearsalSession.timerInterval);
+            }
+            if (!userId) {
+                showMessage("Error. La sesión no se puede guardar. Por favor, recargue la página.");
+                return;
+            }
+
+            try {
+                // Save the rehearsal data to the user's specific collection
+                const rehearsalsCollectionRef = collection(db, `${songsCollectionPath}${userId}/rehearsals`);
+                const songsToSave = rehearsalSession.selectedSongs.map(song => ({
+                    name: song.name,
+                    ratings: song.ratings,
+                    averageRating: calculateAverage(song.ratings)
+                }));
+                await addDoc(rehearsalsCollectionRef, {
+                    date: rehearsalSession.date,
+                    duration: rehearsalSession.duration,
+                    songs: songsToSave,
+                    timestamp: new Date()
+                });
+            } catch (e) {
+                console.error("Error saving the rehearsal:", e);
+                showMessage("Error al guardar el ensayo. Por favor, vuelva a intentarlo.");
+            }
+
+            // Reset state and switch back to main view
+            rehearsalSession.isActive = false;
+            rehearsalSession.currentSongIndex = 0;
+            rehearsalSession.songTimeRemaining = 0;
+            rehearsalSession.totalTimeElapsed = 0;
+            rehearsalView.classList.add('hidden');
+            mainView.classList.remove('hidden');
+            singleSongHistoryView.classList.add('hidden');
+        });
+        
+        // Handle deletion of a rehearsal
+        rehearsalHistoryList.addEventListener('click', async (e) => {
+            const button = e.target.closest('.delete-rehearsal-btn');
+            if (button) {
+                rehearsalIdToDelete = button.dataset.id;
+                showMessage("¿Estás seguro de que quieres eliminar este ensayo?", true);
+            }
+        });
+
+        // Handle confirmation for deletion
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if (!rehearsalIdToDelete) return;
+            
+            if (!userId) {
+                showMessage("Error. No se puede eliminar el ensayo. Por favor, recargue la página.");
+                return;
+            }
+            
+            try {
+                // Delete the document from the user's specific collection
+                const rehearsalDocRef = doc(db, `${songsCollectionPath}${userId}/rehearsals`, rehearsalIdToDelete);
+                await deleteDoc(rehearsalDocRef);
+                showMessage("Ensayo eliminado con éxito.");
+            } catch (e) {
+                console.error("Error deleting the rehearsal:", e);
+                showMessage("Error al eliminar el ensayo. Vuelva a intentarlo.");
+            } finally {
+                rehearsalIdToDelete = null;
+                hideModal();
+            }
+        });
+
+        // Handle cancellation of deletion
+        cancelDeleteBtn.addEventListener('click', () => {
+            hideModal();
+        });
+
+        // Show single song history
+        songsListClickable.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (button) {
+                const songId = button.dataset.songId;
+                const songName = button.dataset.songName;
+                showSongHistory(songId, songName);
+            }
+        });
+
+        function showSongHistory(songId, songName) {
+            mainView.classList.add('hidden');
+            rehearsalView.classList.add('hidden');
+            singleSongHistoryView.classList.remove('hidden');
+            
+            // Set default view to chart and update button
+            chartView.classList.remove('hidden');
+            calendarView.classList.add('hidden');
+            chartIcon.classList.remove('hidden');
+            calendarIcon.classList.add('hidden');
+
+            // If a chart instance already exists, destroy it to prevent errors
+            if (songChart) {
+                songChart.destroy();
+            }
+
+            songHistoryTitle.innerText = songName;
+            songHistoryList.innerHTML = '';
+            
+            const relevantEntries = allRehearsals
+                .map(rehearsal => {
+                    const songEntry = rehearsal.songs.find(s => s.name === songName);
+                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
+                })
+                .filter(entry => entry !== null);
+            
+            if (relevantEntries.length === 0) {
+                songHistoryList.innerHTML = `<p class="text-center text-gray-500">No hay datos de calificación para este tema aún.</p>`;
+                songHistoryAverage.innerText = '0.00';
+                return;
+            }
+
+            let totalRating = 0;
+            let ratingCount = 0;
+            const chartLabels = [];
+            const chartData = [];
+            const ratingsByDate = {}; // New map to store ratings for the calendar
+
+            // Sort by date ascending to show correct timeline in the chart
+            relevantEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            relevantEntries.forEach(entry => {
+                const average = calculateAverage(entry.ratings);
+                totalRating += parseFloat(average) * entry.ratings.length;
+                ratingCount += entry.ratings.length;
+                ratingsByDate[entry.date] = average;
+
+                // Prepare data for the chart
+                chartLabels.push(entry.date);
+                chartData.push(parseFloat(average));
+
+                const rehearsalEntry = document.createElement('div');
+                rehearsalEntry.classList.add('p-4', 'bg-white', 'rounded-xl', 'shadow-md');
+                rehearsalEntry.innerHTML = `
+                    <p class="text-gray-800 font-semibold mb-1">Ensayo del ${entry.date}</p>
+                    <p class="text-sm text-gray-600 mb-2">Calificaciones: ${entry.ratings.join(', ')}</p>
+                    <p class="text-lg font-bold text-indigo-600">Promedio: ${average}</p>
+                `;
+                songHistoryList.appendChild(rehearsalEntry);
+            });
+
+            // Create the chart
+            const ctx = document.getElementById('song-history-chart').getContext('2d');
+            songChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Calificación Promedio',
+                        data: chartData,
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        tension: 0.2,
+                        pointBackgroundColor: 'rgb(79, 70, 229)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(79, 70, 229)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: 'Calificación',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha del Ensayo',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            const overallAverage = ratingCount > 0 ? (totalRating / ratingCount).toFixed(2) : '0.00';
+            songHistoryAverage.innerText = overallAverage;
+            
+            // Render the initial calendar
+            currentCalendarDate = new Date();
+            renderCalendar(ratingsByDate);
+        }
+
+        // Toggles between chart and calendar views
+        toggleViewBtn.addEventListener('click', () => {
+            const isChartView = !chartView.classList.contains('hidden');
+            if (isChartView) {
+                chartView.classList.add('hidden');
+                calendarView.classList.remove('hidden');
+                chartIcon.classList.add('hidden');
+                calendarIcon.classList.remove('hidden');
+            } else {
+                calendarView.classList.add('hidden');
+                chartView.classList.remove('hidden');
+                calendarIcon.classList.add('hidden');
+                chartIcon.classList.remove('hidden');
+            }
+        });
+
+        // Renders the calendar grid
+        function renderCalendar(ratingsData) {
+            calendarGrid.innerHTML = '';
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const monthName = new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+            currentMonthDisplay.innerText = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Add empty cells for padding at the beginning of the month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('p-2', 'rounded-xl', 'text-center');
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Add day cells
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                cell.classList.add('p-2', 'rounded-xl', 'text-center', 'font-bold', 'flex', 'flex-col', 'items-center', 'justify-center', 'shadow-inner');
+                
+                const currentDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (ratingsData[currentDate]) {
+                    cell.classList.add('bg-indigo-200');
+                    cell.innerHTML = `
+                        <span class="text-sm text-gray-800">${day}</span>
+                        <span class="text-xs text-indigo-700 font-semibold mt-1">${ratingsData[currentDate]}</span>
+                    `;
+                } else {
+                    cell.classList.add('bg-gray-100', 'text-gray-400');
+                    cell.innerHTML = `<span class="text-sm">${day}</span>`;
+                }
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        // Handle calendar month navigation
+        prevMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            const songName = songHistoryTitle.innerText;
+            const relevantEntries = allRehearsals
+                .map(rehearsal => {
+                    const songEntry = rehearsal.songs.find(s => s.name === songName);
+                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
+                })
+                .filter(entry => entry !== null);
+            const ratingsByDate = {};
+            relevantEntries.forEach(entry => {
+                ratingsByDate[entry.date] = calculateAverage(entry.ratings);
+            });
+            renderCalendar(ratingsByDate);
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            const songName = songHistoryTitle.innerText;
+            const relevantEntries = allRehearsals
+                .map(rehearsal => {
+                    const songEntry = rehearsal.songs.find(s => s.name === songName);
+                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
+                })
+                .filter(entry => entry !== null);
+            const ratingsByDate = {};
+            relevantEntries.forEach(entry => {
+                ratingsByDate[entry.date] = calculateAverage(entry.ratings);
+            });
+            renderCalendar(ratingsByDate);
+        });
+        
+        // Back to main view
+        backToMainBtn.addEventListener('click', () => {
+            singleSongHistoryView.classList.add('hidden');
+            mainView.classList.remove('hidden');
+        });
+
+        // Initialize the app on page load
+        window.onload = initFirebase;
+    </script>
+</body>
+</html>
