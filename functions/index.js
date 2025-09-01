@@ -30,7 +30,7 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
     }
 
     const callerUid = decodedIdToken.uid;
-    const { email, groupId } = req.body.data;
+    const { email, groupId, role } = req.body.data;
 
     if (!email || !groupId) {
       res.status(400).json({ error: { message: "The function must be called with 'email' and 'groupId' arguments." } });
@@ -63,7 +63,7 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
       }
 
       await groupRef.update({
-        [`members.${invitedUid}`]: "reader",
+        [`members.${invitedUid}`]: role || "reader",
       });
 
       res.status(200).json({ data: { message: `Success! ${email} has been invited to the group.` } });
