@@ -569,6 +569,7 @@
                         manageBtn.dataset.groupId = group.id;
                         manageBtn.dataset.groupName = group.name;
                         manageBtn.addEventListener('click', (e) => {
+                            console.log("Manage button clicked"); // Debug log
                             e.stopPropagation();
                             openMembersModal(group.id, group.name);
                         });
@@ -735,6 +736,7 @@
 
         // --- Member Management ---
         async function openMembersModal(groupId, groupName) {
+            console.log("openMembersModal called with groupId: " + groupId);
             membersGroupName.textContent = groupName;
             membersModal.dataset.groupId = groupId;
             
