@@ -134,7 +134,7 @@
                             <div id="loading-songs" class="text-center text-gray-500 p-2">Cargando temas...</div>
                         </div>
                     </div>
-                    <button type="submit" id="start-rehearsal-btn" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-purple-700 shadow-md">
+                    <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-purple-700 shadow-md">
                         Comenzar Ensayo
                     </button>
                 </form>
@@ -169,7 +169,7 @@
             <div class="flex items-center justify-between mb-2">
                 <h2 id="song-history-title" class="text-3xl sm:text-4xl font-bold text-indigo-800"></h2>
                 <button id="toggle-view-btn" class="p-2 bg-indigo-100 rounded-full shadow-md transition-transform transform hover:scale-110">
-                    <svg id="chart-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-area-chart">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-area-chart">
                         <path d="M3 3v18h18"/>
                         <path d="M7 15l4-5 4 5 4-5"/>
                     </svg>
@@ -183,6 +183,12 @@
             </div>
             <p id="song-history-average" class="text-xl text-gray-600 font-semibold text-center mb-6">Promedio General: <span class="font-bold text-purple-600"></span></p>
             
+            <!-- Sección de enlaces a recursos -->
+            <div id="song-history-links" class="p-4 bg-gray-100 rounded-2xl shadow-inner mb-6">
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">Recursos</h3>
+                <!-- Los enlaces se insertarán aquí -->
+            </div>
+
             <!-- Contenedor del gráfico para el historial de la canción (vista por defecto) -->
             <div id="chart-view" class="p-4 bg-white rounded-xl shadow-inner my-6 h-80">
                 <h3 class="text-lg font-semibold text-gray-800 mb-2 text-center">Rendimiento Histórico</h3>
@@ -335,1008 +341,903 @@
         let songChart = null; // Variable for the chart instance
         let currentCalendarDate = new Date(); // New state for the calendar view
 
-        // Get DOM elements
-        const loginView = document.getElementById('login-view');
-        const mainContainer = document.getElementById('main-container');
-        const loginBtn = document.getElementById('login-btn');
-        const logoutBtn = document.getElementById('logout-btn');
-        const userNameEl = document.getElementById('user-name');
-        const userEmailEl = document.getElementById('user-email');
-        const groupsSection = document.getElementById('groups-section');
-        const createGroupBtn = document.getElementById('create-group-btn');
-        const groupsList = document.getElementById('groups-list');
-        const createGroupModal = document.getElementById('create-group-modal');
-        const closeGroupModal = document.getElementById('close-group-modal');
-        const createGroupForm = document.getElementById('create-group-form');
-        const newGroupNameInput = document.getElementById('new-group-name');
-        const membersModal = document.getElementById('members-modal');
-        const closeMembersModal = document.getElementById('close-members-modal');
-        const membersGroupName = document.getElementById('members-group-name');
-        const membersList = document.getElementById('members-list');
-        const inviteMemberForm = document.getElementById('invite-member-form');
-        const newMemberEmailInput = document.getElementById('new-member-email');
-        
-        const mainView = document.getElementById('main-view');
-        const rehearsalView = document.getElementById('rehearsal-view');
-        const singleSongHistoryView = document.getElementById('single-song-history-view');
-        const backToMainBtn = document.getElementById('back-to-main-btn');
-        const addSongForm = document.getElementById('add-song-form');
-        const newSongInput = document.getElementById('new-song-input');
-        const pdfLinkInput = document.getElementById('pdf-link-input');
-        const videoLinkInput = document.getElementById('video-link-input');
-        const newRehearsalForm = document.getElementById('new-rehearsal-form');
-        const songsListCheckboxes = document.getElementById('songs-list-checkboxes');
-        const songsListClickable = document.getElementById('songs-list-clickable');
-        const startRehearsalBtn = document.getElementById('start-rehearsal-btn');
-        const rehearsalHistoryList = document.getElementById('rehearsal-history-list');
-        const songHistoryList = document.getElementById('song-history-list');
-        const songHistoryTitle = document.getElementById('song-history-title');
-        const songHistoryAverage = document.getElementById('song-history-average').querySelector('span');
-        const loadingSongs = document.getElementById('loading-songs');
-        const loadingSongsClickable = document.getElementById('loading-songs-clickable');
-        const loadingHistory = document.getElementById('loading-history');
-        const currentSongTitleEl = document.getElementById('current-song-title');
-        const songLinksContainer = document.getElementById('song-links');
-        const songTimerEl = document.getElementById('song-timer');
-        const totalTimeDisplayEl = document.getElementById('total-time-display');
-        const nextSongBtn = document.getElementById('next-song-btn');
-        const finishRehearsalBtn = document.getElementById('finish-rehearsal-btn');
-        const progressFillEl = document.getElementById('progress-fill');
-        const currentSongRatingsListEl = document.getElementById('current-song-ratings-list');
-        const currentSongAverageRatingEl = document.getElementById('current-song-average-rating');
-        const modal = document.getElementById('myModal');
-        const modalMessage = document.getElementById('modal-message');
-        const modalButtons = document.getElementById('modal-buttons');
-        const closeButton = document.querySelector('.close-button');
-        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-        const toggleViewBtn = document.getElementById('toggle-view-btn');
-        const chartView = document.getElementById('chart-view');
-        const calendarView = document.getElementById('calendar-view');
-        const calendarIcon = document.getElementById('calendar-icon');
-        const chartIcon = document.getElementById('chart-icon');
-        const prevMonthBtn = document.getElementById('prev-month-btn');
-        const nextMonthBtn = document.getElementById('next-month-btn');
-        const currentMonthDisplay = document.getElementById('current-month-display');
-        const calendarGrid = document.getElementById('calendar-grid');
-        const addSongSection = document.getElementById('add-song-section');
-        const startRehearsalSection = document.getElementById('start-rehearsal-section');
-
-
-        // Rehearsal session state
-        let allSongs = [];
-        let allRehearsals = []; // New variable to store all rehearsals
-        let rehearsalSession = {
-            isActive: false,
-            date: null,
-            duration: 0,
-            selectedSongs: [],
-            currentSongIndex: 0,
-            songTimeAllotted: 0,
-            timerInterval: null,
-            songTimeRemaining: 0,
-            totalTimeElapsed: 0,
-            ratings: []
-        };
-        
-        // Modal functions
-        function showMessage(message, isConfirmation = false) {
-            modalMessage.innerText = message;
-            if (isConfirmation) {
-                modalButtons.classList.remove('hidden');
-            } else {
-                modalButtons.classList.add('hidden');
-            }
-            modal.style.display = 'flex';
-        }
-
-        function hideModal() {
-            modal.style.display = 'none';
-            rehearsalIdToDelete = null;
-        }
-
-        closeButton.onclick = hideModal;
-        closeGroupModal.onclick = () => createGroupModal.style.display = 'none';
-        closeMembersModal.onclick = () => membersModal.style.display = 'none';
-
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                hideModal();
-            }
-            if (event.target == createGroupModal) {
-                createGroupModal.style.display = 'none';
-            }
-            if (event.target == membersModal) {
-                membersModal.style.display = 'none';
-            }
-        }
-        
-        // Timer formatting
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        }
-
-        // Firebase Initialization
-        async function initFirebase() {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                functions = getFunctions(app);
-
-                if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-                    console.log("Connecting to emulators");
-                    connectAuthEmulator(auth, "http://localhost:9099");
-                    connectFirestoreEmulator(db, "localhost", 8080);
-                    connectFunctionsEmulator(functions, "localhost", 5001);
-                }
-                
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        userNameEl.innerText = user.displayName || 'Usuario';
-                        userEmailEl.innerText = user.email;
-
-                        await saveUserToFirestore(user);
-
-                        loginView.classList.add('hidden');
-                        mainContainer.classList.remove('hidden');
-                        
-                        listenForGroups();
-                        document.getElementById('rehearsal-date').valueAsDate = new Date();
-                    } else {
-                        userId = null;
-                        loginView.classList.remove('hidden');
-                        mainContainer.classList.add('hidden');
-                    }
-                });
-            } catch (error) {
-                console.error("Error al inicializar Firebase:", error);
-                showMessage("Error al inicializar la aplicación. " + error.message);
-            }
-        }
-
-        async function saveUserToFirestore(user) {
-            const userRef = doc(db, "users", user.uid);
-            const userDoc = await getDoc(userRef);
-            if (!userDoc.exists()) {
-                await setDoc(userRef, {
-                    name: user.displayName,
-                    email: user.email,
-                    createdAt: new Date()
-                });
-            }
-        }
-
-        // --- Data Fetching and Rendering ---
-
-        function listenForGroups() {
-            if (!userId) return;
-            const groupsCollectionRef = collection(db, 'groups');
-            const q = query(groupsCollectionRef, where(`members.${userId}`, 'in', ['admin', 'reader', 'creator']));
-
-            onSnapshot(q, (snapshot) => {
-                userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderGroups();
-                if (!selectedGroupId && userGroups.length > 0) {
-                    selectGroup(userGroups[0].id);
-                } else if (selectedGroupId) {
-                    // If a group was selected, re-render members modal if it's open
-                    if (membersModal.style.display === 'flex') {
-                        const group = userGroups.find(g => g.id === selectedGroupId);
-                        if (group) {
-                            openMembersModal(group.id, group.name);
-                        } else {
-                            // The group may have been deleted or the user removed
-                            membersModal.style.display = 'none';
-                        }
-                    }
-                }
-                 updateUIVisibility();
-            });
-        }
-
-        function renderGroups() {
-            groupsList.innerHTML = '';
-            if (userGroups.length === 0) {
-                groupsList.innerHTML = `<p class="text-center text-gray-500">No perteneces a ningún grupo. ¡Crea uno!</p>`;
-                mainView.classList.add('hidden');
-            } else {
-                mainView.classList.remove('hidden');
-                userGroups.forEach(group => {
-                    const groupElWrapper = document.createElement('div');
-                    groupElWrapper.className = 'flex items-center space-x-2';
-
-                    const groupEl = document.createElement('button');
-                    groupEl.dataset.groupId = group.id;
-                    groupEl.textContent = group.name;
-                    groupEl.className = `w-full text-left p-2 rounded-lg font-semibold`;
-                    if (group.id === selectedGroupId) {
-                        groupEl.classList.add('bg-indigo-600', 'text-white');
-                    } else {
-                        groupEl.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-indigo-200');
-                    }
-                    groupEl.addEventListener('click', () => selectGroup(group.id));
-                    groupElWrapper.appendChild(groupEl);
-
-                    // Add manage button for admins
-                    if (group.members[userId] === 'admin') {
-                        const manageBtn = document.createElement('button');
-                        manageBtn.textContent = 'Gestionar';
-                        manageBtn.className = 'bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600';
-                        manageBtn.dataset.groupId = group.id;
-                        manageBtn.dataset.groupName = group.name;
-                        manageBtn.addEventListener('click', (e) => {
-                            console.log("Manage button clicked"); // Debug log
-                            e.stopPropagation();
-                            openMembersModal(group.id, group.name);
-                        });
-                        groupElWrapper.appendChild(manageBtn);
-                    }
-
-                    groupsList.appendChild(groupElWrapper);
-                });
-            }
-        }
-
-        function selectGroup(groupId) {
-            selectedGroupId = groupId;
-            renderGroups(); // Re-render to highlight the selected group
-            listenForSongs();
-            listenForRehearsalHistory();
-            updateUIVisibility();
-        }
-
-        function updateUIVisibility() {
-            if (!selectedGroupId || !userId) return;
-
-            const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
-            if (!selectedGroup) return;
-
-            const userRole = selectedGroup.members[userId];
-
-            if (userRole === 'admin' || userRole === 'creator') {
-                addSongSection.style.display = 'block';
-                startRehearsalSection.style.display = 'block';
-            } else {
-                addSongSection.style.display = 'none';
-                startRehearsalSection.style.display = 'none';
-            }
-        }
-        
-        function listenForSongs() {
-            if (!selectedGroupId) return;
-            const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
-            onSnapshot(songsCollectionRef, (snapshot) => {
-                allSongs = snapshot.docs.map(doc => ({ 
-                    id: doc.id, 
-                    name: doc.data().name,
-                    pdfLink: doc.data().pdfLink || null,
-                    videoLink: doc.data().videoLink || null
-                }));
-                renderSongsForSelection();
-                renderSongsForHistory();
-                loadingSongs.classList.add('hidden');
-                loadingSongsClickable.classList.add('hidden');
-            }, (error) => {
-                console.error("Error listening for songs:", error);
-            });
-        }
-        
-        function renderSongsForSelection() {
-            songsListCheckboxes.innerHTML = '';
-            if (allSongs.length === 0) {
-                songsListCheckboxes.innerHTML = `<p class="text-center text-gray-500">Añade temas para empezar.</p>`;
-            } else {
-                allSongs.forEach(song => {
-                    const div = document.createElement('div');
-                    div.innerHTML = `
-                        <label class="inline-flex items-center">
-                            <input type="checkbox" name="selected-song" value="${song.id}" data-name="${song.name}" 
-                                   data-pdf-link="${song.pdfLink || ''}" data-video-link="${song.videoLink || ''}" 
-                                   class="rounded text-purple-600 focus:ring-purple-500">
-                            <span class="ml-2 text-gray-800">${song.name}</span>
-                        </label>
-                    `;
-                    songsListCheckboxes.appendChild(div);
-                });
-            }
-        }
-
-        function renderSongsForHistory() {
-            songsListClickable.innerHTML = '';
-            if (allSongs.length === 0) {
-                songsListClickable.innerHTML = `<p class="text-center text-gray-500">Añade temas para ver el historial.</p>`;
-            } else {
-                allSongs.forEach(song => {
-                    const button = document.createElement('button');
-                    button.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'text-left', 'hover:bg-indigo-200', 'transition-colors');
-                    button.dataset.songId = song.id;
-                    button.dataset.songName = song.name;
-                    button.innerHTML = `<span class="font-semibold text-gray-800">${song.name}</span>`;
-                    songsListClickable.appendChild(button);
-                });
-            }
-        }
-
-        function listenForRehearsalHistory() {
-            if (!selectedGroupId) return;
-            const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
-            onSnapshot(historyCollectionRef, (snapshot) => {
-                allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderRehearsalHistory(allRehearsals);
-                loadingHistory.classList.add('hidden');
-            }, (error) => {
-                console.error("Error listening for rehearsal history:", error);
-            });
-        }
-
-        function renderRehearsalHistory(rehearsals) {
-            rehearsalHistoryList.innerHTML = '';
-            if (rehearsals.length === 0) {
-                rehearsalHistoryList.innerHTML = `<p class="text-center text-gray-500">Aún no hay ensayos registrados.</p>`;
-                return;
-            }
-            rehearsals.sort((a, b) => new Date(b.date) - new Date(a.date));
-            rehearsals.forEach(rehearsal => {
-                const songInfoHtml = rehearsal.songs.map(song => 
-                    `<div class="text-sm font-medium text-gray-700">${song.name} (${calculateAverage(song.ratings)})</div>`
-                ).join('');
-
-                const rehearsalEl = document.createElement('div');
-                rehearsalEl.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'flex', 'flex-col', 'space-y-2');
-                rehearsalEl.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-base font-semibold text-gray-800">
-                                Ensayo del ${rehearsal.date}
-                                <span class="text-sm text-gray-500 font-normal">(${rehearsal.duration} min)</span>
-                            </p>
-                        </div>
-                        <button data-id="${rehearsal.id}" class="delete-rehearsal-btn bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                <line x1="10" x2="10" y1="11" y2="17"/>
-                                <line x1="14" x2="14" y1="11" y2="17"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="flex flex-col space-y-1 mt-2">
-                        ${songInfoHtml}
-                    </div>
-                `;
-                rehearsalHistoryList.appendChild(rehearsalEl);
-            });
-        }
-
-        function calculateAverage(ratings) {
-            if (!ratings || ratings.length === 0) return 'N/A';
-            const sum = ratings.reduce((total, rating) => total + rating, 0);
-            return (sum / ratings.length).toFixed(2);
-        }
-
-        function renderCurrentSongRatings(ratings) {
-            currentSongRatingsListEl.innerHTML = '';
-            if (ratings.length === 0) {
-                currentSongRatingsListEl.innerHTML = '<span class="text-gray-500">Sin calificaciones aún.</span>';
-            } else {
-                ratings.forEach(rating => {
-                    const ratingSpan = document.createElement('span');
-                    ratingSpan.classList.add('bg-gray-200', 'text-gray-700', 'font-bold', 'px-3', 'py-1', 'rounded-full');
-                    ratingSpan.innerText = rating;
-                    currentSongRatingsListEl.appendChild(ratingSpan);
-                });
-            }
-            currentSongAverageRatingEl.innerText = `Promedio: ${calculateAverage(ratings)}`;
-        }
-
-        // --- Member Management ---
-        async function openMembersModal(groupId, groupName) {
-            console.log("openMembersModal called with groupId: " + groupId);
-            membersGroupName.textContent = groupName;
-            membersModal.dataset.groupId = groupId;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get DOM elements
+            const loginView = document.getElementById('login-view');
+            const mainContainer = document.getElementById('main-container');
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userNameEl = document.getElementById('user-name');
+            const userEmailEl = document.getElementById('user-email');
+            const groupsSection = document.getElementById('groups-section');
+            const createGroupBtn = document.getElementById('create-group-btn');
+            const groupsList = document.getElementById('groups-list');
+            const createGroupModal = document.getElementById('create-group-modal');
+            const closeGroupModal = document.getElementById('close-group-modal');
+            const createGroupForm = document.getElementById('create-group-form');
+            const newGroupNameInput = document.getElementById('new-group-name');
+            const membersModal = document.getElementById('members-modal');
+            const closeMembersModal = document.getElementById('close-members-modal');
+            const membersGroupName = document.getElementById('members-group-name');
+            const membersList = document.getElementById('members-list');
+            const inviteMemberForm = document.getElementById('invite-member-form');
+            const newMemberEmailInput = document.getElementById('new-member-email');
+            const editSongLinksModal = document.getElementById('edit-song-links-modal');
+            const closeEditLinksModal = document.getElementById('close-edit-links-modal');
+            const editSongLinksForm = document.getElementById('edit-song-links-form');
+            const editPdfLinkInput = document.getElementById('edit-pdf-link-input');
+            const editVideoLinkInput = document.getElementById('edit-video-link-input');
             
-            const group = userGroups.find(g => g.id === groupId);
-            if (!group) return;
+            const mainView = document.getElementById('main-view');
+            const rehearsalView = document.getElementById('rehearsal-view');
+            const singleSongHistoryView = document.getElementById('single-song-history-view');
+            const backToMainBtn = document.getElementById('back-to-main-btn');
+            const addSongForm = document.getElementById('add-song-form');
+            const newSongInput = document.getElementById('new-song-input');
+            const pdfLinkInput = document.getElementById('pdf-link-input');
+            const videoLinkInput = document.getElementById('video-link-input');
+            const newRehearsalForm = document.getElementById('new-rehearsal-form');
+            const songsListCheckboxes = document.getElementById('songs-list-checkboxes');
+            const songsListClickable = document.getElementById('songs-list-clickable');
+            const startRehearsalBtn = document.getElementById('start-rehearsal-btn');
+            const rehearsalHistoryList = document.getElementById('rehearsal-history-list');
+            const songHistoryList = document.getElementById('song-history-list');
+            const songHistoryTitle = document.getElementById('song-history-title');
+            const songHistoryAverage = document.getElementById('song-history-average').querySelector('span');
+            const songHistoryLinks = document.getElementById('song-history-links'); // This was the problematic line
+            const loadingSongs = document.getElementById('loading-songs');
+            const loadingSongsClickable = document.getElementById('loading-songs-clickable');
+            const loadingHistory = document.getElementById('loading-history');
+            const currentSongTitleEl = document.getElementById('current-song-title');
+            const songLinksContainer = document.getElementById('song-links');
+            const songTimerEl = document.getElementById('song-timer');
+            const totalTimeDisplayEl = document.getElementById('total-time-display');
+            const nextSongBtn = document.getElementById('next-song-btn');
+            const finishRehearsalBtn = document.getElementById('finish-rehearsal-btn');
+            const progressFillEl = document.getElementById('progress-fill');
+            const currentSongRatingsListEl = document.getElementById('current-song-ratings-list');
+            const currentSongAverageRatingEl = document.getElementById('current-song-average-rating');
+            const modal = document.getElementById('myModal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalButtons = document.getElementById('modal-buttons');
+            const closeButton = document.querySelector('.close-button');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const toggleViewBtn = document.getElementById('toggle-view-btn');
+            const chartView = document.getElementById('chart-view');
+            const calendarView = document.getElementById('calendar-view');
+            const calendarIcon = document.getElementById('calendar-icon');
+            const chartIcon = document.getElementById('chart-icon');
+            const prevMonthBtn = document.getElementById('prev-month-btn');
+            const nextMonthBtn = document.getElementById('next-month-btn');
+            const currentMonthDisplay = document.getElementById('current-month-display');
+            const calendarGrid = document.getElementById('calendar-grid');
+            const addSongSection = document.getElementById('add-song-section');
+            const startRehearsalSection = document.getElementById('start-rehearsal-section');
 
-            membersList.innerHTML = '<div class="text-center text-gray-500 p-2">Cargando miembros...</div>';
-            
-            const memberUIDs = Object.keys(group.members);
-            const userDocs = await Promise.all(memberUIDs.map(uid => getDoc(doc(db, 'users', uid))));
-            const memberDetails = userDocs
-                .filter(doc => doc.exists())
-                .map(userDoc => ({
-                    uid: userDoc.id,
-                    ...userDoc.data()
-                }));
 
-            renderMembers(group, memberDetails);
-            membersModal.style.display = 'flex';
-        }
-
-        function renderMembers(group, memberDetails) {
-            membersList.innerHTML = '';
-            memberDetails.forEach(member => {
-                const memberEl = document.createElement('div');
-                memberEl.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-lg';
-                
-                const memberInfo = document.createElement('div');
-                memberInfo.className = 'text-left';
-                memberInfo.innerHTML = `
-                    <p class="font-semibold text-gray-800">${member.name || member.email}</p>
-                    <p class="text-sm text-gray-500">${member.email}</p>
-                `;
-
-                const memberActions = document.createElement('div');
-                memberActions.className = 'flex items-center space-x-2';
-
-                const roleSelect = document.createElement('select');
-                roleSelect.className = 'p-1 rounded-md border-gray-300';
-                roleSelect.dataset.uid = member.uid;
-                
-                const optionAdmin = document.createElement('option');
-                optionAdmin.value = 'admin';
-                optionAdmin.textContent = 'Admin';
-                if (group.members[member.uid] === 'admin') optionAdmin.selected = true;
-                
-                const optionReader = document.createElement('option');
-                optionReader.value = 'reader';
-                optionReader.textContent = 'Lector';
-                if (group.members[member.uid] === 'reader') optionReader.selected = true;
-
-                const optionCreator = document.createElement('option');
-                optionCreator.value = 'creator';
-                optionCreator.textContent = 'Creador';
-                if (group.members[member.uid] === 'creator') optionCreator.selected = true;
-
-                roleSelect.appendChild(optionAdmin);
-                roleSelect.appendChild(optionCreator);
-                roleSelect.appendChild(optionReader);
-                
-                if (group.owner === member.uid) {
-                    roleSelect.disabled = true;
-                }
-
-                roleSelect.addEventListener('change', (e) => {
-                    updateMemberRole(group.id, member.uid, e.target.value);
-                });
-
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600';
-                removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
-                
-                if (group.owner === member.uid) {
-                    removeBtn.disabled = true;
-                    removeBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                } else {
-                    removeBtn.addEventListener('click', () => {
-                        removeMember(group.id, member.uid);
-                    });
-                }
-
-                memberActions.appendChild(roleSelect);
-                memberActions.appendChild(removeBtn);
-                
-                memberEl.appendChild(memberInfo);
-                memberEl.appendChild(memberActions);
-                membersList.appendChild(memberEl);
-            });
-        }
-
-        async function updateMemberRole(groupId, memberUid, newRole) {
-            const groupRef = doc(db, 'groups', groupId);
-            try {
-                await updateDoc(groupRef, {
-                    [`members.${memberUid}`]: newRole
-                });
-                showMessage('Rol actualizado correctamente.');
-            } catch (error) {
-                console.error("Error updating role:", error);
-                showMessage('Error al actualizar el rol.');
-            }
-        }
-
-        async function removeMember(groupId, memberUid) {
-            const groupRef = doc(db, 'groups', groupId);
-            try {
-                await updateDoc(groupRef, {
-                    [`members.${memberUid}`]: deleteField()
-                });
-                showMessage('Miembro eliminado correctamente.');
-            } catch (error) {
-                console.error("Error removing member:", error);
-                showMessage('Error al eliminar el miembro.');
-            }
-        }
-
-        inviteMemberForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = newMemberEmailInput.value.trim();
-            const role = document.getElementById('new-member-role').value;
-            const groupId = membersModal.dataset.groupId;
-            const user = auth.currentUser;
-
-            if (email && groupId && user) {
-                try {
-                    const idToken = await user.getIdToken();
-                    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-                    const projectId = firebaseConfig.projectId;
-                    const functionUrl = isLocal 
-                        ? `http://localhost:5001/${projectId}/us-central1/inviteUserToGroup`
-                        : `https://us-central1-${projectId}.cloudfunctions.net/inviteUserToGroup`;
-
-                    const response = await fetch(functionUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${idToken}`
-                        },
-                        body: JSON.stringify({ data: { email, groupId, role } })
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.error.message || 'An unknown error occurred.');
-                    }
-
-                    showMessage(result.data.message);
-                    newMemberEmailInput.value = '';
-                } catch (error) {
-                    console.error("Error inviting user:", error);
-                    showMessage(`Error: ${error.message}`);
-                }
-            }
-        });
-
-        // --- Event Listeners and Logic ---
-
-        loginBtn.addEventListener('click', async () => {
-            const provider = new GoogleAuthProvider();
-            try {
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Error durante el inicio de sesión con Google:", error);
-                showMessage("Error al iniciar sesión: " + error.message);
-            }
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Error durante el cierre de sesión:", error);
-                showMessage("Error al cerrar sesión.");
-            }
-        });
-
-        createGroupBtn.addEventListener('click', () => {
-            createGroupModal.style.display = 'flex';
-        });
-
-        createGroupForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const groupName = newGroupNameInput.value.trim();
-            if (groupName && userId) {
-                try {
-                    const groupsCollectionRef = collection(db, 'groups');
-                    await addDoc(groupsCollectionRef, {
-                        name: groupName,
-                        owner: userId,
-                        createdAt: new Date(),
-                        members: {
-                            [userId]: 'admin'
-                        }
-                    });
-                    newGroupNameInput.value = '';
-                    createGroupModal.style.display = 'none';
-                } catch (error) {
-                    console.error("Error creating group:", error);
-                    showMessage("Error al crear el grupo.");
-                }
-            }
-        });
-
-        groupsList.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (button && !button.dataset.groupName) { // Ensure it's not the manage button
-                const groupId = button.dataset.groupId;
-                selectGroup(groupId);
-            }
-        });
-
-        addSongForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const songName = newSongInput.value.trim();
-            const pdfLink = pdfLinkInput.value.trim();
-            const videoLink = videoLinkInput.value.trim();
-
-            if (songName === "") {
-                showMessage("El nombre de la canción no puede estar vacío.");
-                return;
-            }
-            if (!userId || !selectedGroupId) {
-                showMessage("Debes seleccionar un grupo para añadir canciones.");
-                return;
-            }
-            try {
-                const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
-                await addDoc(songsCollectionRef, { 
-                    name: songName,
-                    pdfLink: pdfLink,
-                    videoLink: videoLink,
-                    createdBy: userId,
-                    createdAt: new Date()
-                });
-                newSongInput.value = '';
-                pdfLinkInput.value = '';
-                videoLinkInput.value = '';
-            } catch (e) {
-                console.error("Error al añadir la canción:", e);
-                showMessage("Error al añadir la canción. Intente de nuevo.");
-            }
-        });
-
-        newRehearsalForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const date = document.getElementById('rehearsal-date').value;
-            const duration = parseInt(document.getElementById('rehearsal-duration').value, 10);
-            const selectedSongs = Array.from(document.querySelectorAll('input[name="selected-song"]:checked')).map(cb => ({
-                id: cb.value,
-                name: cb.dataset.name,
-                pdfLink: cb.dataset.pdfLink,
-                videoLink: cb.dataset.videoLink,
+            // Rehearsal session state
+            let allSongs = [];
+            let allRehearsals = []; // New variable to store all rehearsals
+            let rehearsalSession = {
+                isActive: false,
+                date: null,
+                duration: 0,
+                selectedSongs: [],
+                currentSongIndex: 0,
+                songTimeAllotted: 0,
+                timerInterval: null,
+                songTimeRemaining: 0,
+                totalTimeElapsed: 0,
                 ratings: []
-            }));
-
-            if (selectedSongs.length === 0) {
-                showMessage("Debes seleccionar al menos un tema para el ensayo.");
-                return;
-            }
-            if (duration <= 0) {
-                showMessage("La duración del ensayo debe ser al menos 1 minuto.");
-                return;
-            }
-
-            rehearsalSession.isActive = true;
-            rehearsalSession.date = date;
-            rehearsalSession.duration = duration;
-            rehearsalSession.selectedSongs = selectedSongs;
-            rehearsalSession.currentSongIndex = 0;
-            rehearsalSession.totalTimeElapsed = 0;
-            rehearsalSession.songTimeAllotted = (duration * 60) / selectedSongs.length;
-            rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
+            };
             
-            renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
-            renderSongLinks();
-
-            mainView.classList.add('hidden');
-            rehearsalView.classList.remove('hidden');
-            singleSongHistoryView.classList.add('hidden');
-            startSongTimer();
-        });
-
-        function startSongTimer() {
-            if (rehearsalSession.timerInterval) {
-                clearInterval(rehearsalSession.timerInterval);
-            }
-            updateRehearsalDisplay();
-            
-            rehearsalSession.timerInterval = setInterval(() => {
-                rehearsalSession.songTimeRemaining--;
-                rehearsalSession.totalTimeElapsed++;
-                updateRehearsalDisplay();
-                
-                if (rehearsalSession.songTimeRemaining <= 0) {
-                    clearInterval(rehearsalSession.timerInterval);
-                    showMessage("¡Tiempo terminado para este tema! Presiona Siguiente para continuar.");
+            // Modal functions
+            function showMessage(message, isConfirmation = false) {
+                modalMessage.innerText = message;
+                if (isConfirmation) {
+                    modalButtons.classList.remove('hidden');
+                } else {
+                    modalButtons.classList.add('hidden');
                 }
-            }, 1000);
-        }
-
-        function updateRehearsalDisplay() {
-            const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
-            currentSongTitleEl.innerText = currentSong.name;
-            songTimerEl.innerText = formatTime(rehearsalSession.songTimeRemaining);
-            totalTimeDisplayEl.innerText = `Tiempo total transcurrido: ${formatTime(rehearsalSession.totalTimeElapsed)}`;
-            const progressPercentage = (rehearsalSession.songTimeAllotted - rehearsalSession.songTimeRemaining) / rehearsalSession.songTimeAllotted * 100;
-            progressFillEl.style.width = `${Math.min(100, progressPercentage)}%`;
-        }
-
-        function renderSongLinks() {
-            songLinksContainer.innerHTML = '';
-            const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
-
-            if (currentSong.pdfLink) {
-                const pdfButton = document.createElement('a');
-                pdfButton.href = currentSong.pdfLink;
-                pdfButton.target = "_blank";
-                pdfButton.classList.add('flex', 'items-center', 'space-x-2', 'bg-red-500', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-xl', 'transition-transform', 'transform', 'hover:scale-105', 'hover:bg-red-600', 'shadow-md');
-                pdfButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text">
-                        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
-                        <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
-                        <path d="M10 9H8"/>
-                        <path d="M16 13H8"/>
-                        <path d="M16 17H8"/>
-                    </svg>
-                    <span>Partitura</span>
-                `;
-                songLinksContainer.appendChild(pdfButton);
+                modal.style.display = 'flex';
             }
 
-            if (currentSong.videoLink) {
-                const videoButton = document.createElement('a');
-                videoButton.href = currentSong.videoLink;
-                videoButton.target = "_blank";
-                videoButton.classList.add('flex', 'items-center', 'space-x-2', 'bg-blue-500', 'text-white', 'font-bold', 'py-2', 'px-4', 'rounded-xl', 'transition-transform', 'transform', 'hover:scale-105', 'hover:bg-blue-600', 'shadow-md');
-                videoButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-youtube">
-                        <path d="M2.5 17a2.41 2.41 0 0 1-1.48-2.75 6.96 6.96 0 0 1-.22-2.11 6.13 6.13 0 0 1 .22-2.11A2.41 2.41 0 0 1 2.5 7h19a2.41 2.41 0 0 1 1.48 2.75 6.13 6.13 0 0 1-.22 2.11 6.96 6.96 0 0 1 .22 2.11A2.41 2.41 0 0 1 21.5 17Z"/>
-                        <path d="m10 12 5 3-5 3z"/>
-                    </svg>
-                    <span>Video</span>
-                `;
-                songLinksContainer.appendChild(videoButton);
+            function hideModal() {
+                modal.style.display = 'none';
+                rehearsalIdToDelete = null;
             }
-        }
-        
-        rehearsalView.addEventListener('click', async (e) => {
-            const button = e.target;
-            if (button.classList.contains('rating-btn')) {
-                const rating = parseInt(button.dataset.rating, 10);
-                const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
-                currentSong.ratings.push(rating);
-                renderCurrentSongRatings(currentSong.ratings);
+
+            closeButton.onclick = hideModal;
+            closeGroupModal.onclick = () => createGroupModal.style.display = 'none';
+            closeMembersModal.onclick = () => membersModal.style.display = 'none';
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    hideModal();
+                }
+                if (event.target == createGroupModal) {
+                    createGroupModal.style.display = 'none';
+                }
+                if (event.target == membersModal) {
+                    membersModal.style.display = 'none';
+                }
             }
-        });
-        
-        nextSongBtn.addEventListener('click', () => {
-            if (rehearsalSession.currentSongIndex < rehearsalSession.selectedSongs.length - 1) {
-                rehearsalSession.currentSongIndex++;
+            
+            // Timer formatting
+            function formatTime(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+            }
+
+            // Firebase Initialization
+            async function initFirebase() {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    functions = getFunctions(app);
+
+                    if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+                        console.log("Connecting to emulators");
+                        connectAuthEmulator(auth, "http://localhost:9099");
+                        connectFirestoreEmulator(db, "localhost", 8080);
+                        connectFunctionsEmulator(functions, "localhost", 5001);
+                    }
+                    
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            userNameEl.innerText = user.displayName || 'Usuario';
+                            userEmailEl.innerText = user.email;
+
+                            await saveUserToFirestore(user);
+
+                            loginView.classList.add('hidden');
+                            mainContainer.classList.remove('hidden');
+                            
+                            listenForGroups();
+                            document.getElementById('rehearsal-date').valueAsDate = new Date();
+                        } else {
+                            userId = null;
+                            loginView.classList.remove('hidden');
+                            mainContainer.classList.add('hidden');
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error al inicializar Firebase:", error);
+                    showMessage("Error al inicializar la aplicación. " + error.message);
+                }
+            }
+
+            async function saveUserToFirestore(user) {
+                const userRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userRef);
+                if (!userDoc.exists()) {
+                    await setDoc(userRef, {
+                        name: user.displayName,
+                        email: user.email,
+                        createdAt: new Date()
+                    });
+                }
+            }
+
+            // --- Data Fetching and Rendering ---
+
+            function listenForGroups() {
+                if (!userId) return;
+                const groupsCollectionRef = collection(db, 'groups');
+                const q = query(groupsCollectionRef, where(`members.${userId}`, 'in', ['admin', 'reader', 'creator']));
+
+                onSnapshot(q, (snapshot) => {
+                    userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderGroups();
+                    if (!selectedGroupId && userGroups.length > 0) {
+                        selectGroup(userGroups[0].id);
+                    } else if (selectedGroupId) {
+                        // If a group was selected, re-render members modal if it's open
+                        if (membersModal.style.display === 'flex') {
+                            const group = userGroups.find(g => g.id === selectedGroupId);
+                            if (group) {
+                                openMembersModal(group.id, group.name);
+                            } else {
+                                // The group may have been deleted or the user removed
+                                membersModal.style.display = 'none';
+                            }
+                        }
+                    }
+                    updateUIVisibility();
+                });
+            }
+
+            function renderGroups() {
+                groupsList.innerHTML = '';
+                if (userGroups.length === 0) {
+                    groupsList.innerHTML = `<p class="text-center text-gray-500">No perteneces a ningún grupo. ¡Crea uno!</p>`;
+                    mainView.classList.add('hidden');
+                } else {
+                    mainView.classList.remove('hidden');
+                    userGroups.forEach(group => {
+                        const groupElWrapper = document.createElement('div');
+                        groupElWrapper.className = 'flex items-center space-x-2';
+
+                        const groupEl = document.createElement('button');
+                        groupEl.dataset.groupId = group.id;
+                        groupEl.textContent = group.name;
+                        groupEl.className = `w-full text-left p-2 rounded-lg font-semibold`;
+                        if (group.id === selectedGroupId) {
+                            groupEl.classList.add('bg-indigo-600', 'text-white');
+                        } else {
+                            groupEl.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-indigo-200');
+                        }
+                        groupEl.addEventListener('click', () => selectGroup(group.id));
+                        groupElWrapper.appendChild(groupEl);
+
+                        // Add manage button for admins
+                        if (group.members[userId] === 'admin') {
+                            const manageBtn = document.createElement('button');
+                            manageBtn.textContent = 'Gestionar';
+                            manageBtn.className = 'bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600';
+                            manageBtn.dataset.groupId = group.id;
+                            manageBtn.dataset.groupName = group.name;
+                            manageBtn.addEventListener('click', (e) => {
+                                console.log("Manage button clicked"); // Debug log
+                                e.stopPropagation();
+                                openMembersModal(group.id, group.name);
+                            });
+                            groupElWrapper.appendChild(manageBtn);
+                        }
+
+                        groupsList.appendChild(groupElWrapper);
+                    });
+                }
+            }
+
+            function selectGroup(groupId) {
+                selectedGroupId = groupId;
+                renderGroups(); // Re-render to highlight the selected group
+                listenForSongs();
+                listenForRehearsalHistory();
+                updateUIVisibility();
+            }
+
+            function updateUIVisibility() {
+                if (!selectedGroupId || !userId) return;
+
+                const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
+                if (!selectedGroup) return;
+
+                const userRole = selectedGroup.members[userId];
+
+                if (userRole === 'admin' || userRole === 'creator') {
+                    addSongSection.style.display = 'block';
+                    startRehearsalSection.style.display = 'block';
+                } else {
+                    addSongSection.style.display = 'none';
+                    startRehearsalSection.style.display = 'none';
+                }
+            }
+            
+            function listenForSongs() {
+                if (!selectedGroupId) return;
+                const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
+                onSnapshot(songsCollectionRef, (snapshot) => {
+                    allSongs = snapshot.docs.map(doc => ({ 
+                        id: doc.id, 
+                        name: doc.data().name,
+                        pdfLink: doc.data().pdfLink || null,
+                        videoLink: doc.data().videoLink || null
+                    }));
+                    renderSongsForSelection();
+                    renderSongsForHistory();
+                    loadingSongs.classList.add('hidden');
+                    loadingSongsClickable.classList.add('hidden');
+                }, (error) => {
+                    console.error("Error listening for songs:", error);
+                });
+            }
+            
+            function renderSongsForSelection() {
+                songsListCheckboxes.innerHTML = '';
+                if (allSongs.length === 0) {
+                    songsListCheckboxes.innerHTML = `<p class="text-center text-gray-500">Añade temas para empezar.</p>`;
+                } else {
+                    allSongs.forEach(song => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="selected-song" value="${song.id}" data-name="${song.name}" 
+                                       data-pdf-link="${song.pdfLink || ''}" data-video-link="${song.videoLink || ''}" 
+                                       class="rounded text-purple-600 focus:ring-purple-500">
+                                <span class="ml-2 text-gray-800">${song.name}</span>
+                            </label>
+                        `;
+                        songsListCheckboxes.appendChild(div);
+                    });
+                }
+            }
+
+            function renderSongsForHistory() {
+                songsListClickable.innerHTML = '';
+                if (allSongs.length === 0) {
+                    songsListClickable.innerHTML = `<p class="text-center text-gray-500">Añade temas para ver el historial.</p>`;
+                } else {
+                    allSongs.forEach(song => {
+                        const button = document.createElement('button');
+                        button.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'text-left', 'hover:bg-indigo-200', 'transition-colors');
+                        button.dataset.songId = song.id;
+                        button.dataset.songName = song.name;
+                        button.innerHTML = `<span class="font-semibold text-gray-800">${song.name}</span>`;
+                        songsListClickable.appendChild(button);
+                    });
+                }
+            }
+
+            function listenForRehearsalHistory() {
+                if (!selectedGroupId) return;
+                const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
+                onSnapshot(historyCollectionRef, (snapshot) => {
+                    allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    renderRehearsalHistory(allRehearsals);
+                    loadingHistory.classList.add('hidden');
+                }, (error) => {
+                    console.error("Error listening for rehearsal history:", error);
+                });
+            }
+
+            function renderRehearsalHistory(rehearsals) {
+                rehearsalHistoryList.innerHTML = '';
+                if (rehearsals.length === 0) {
+                    rehearsalHistoryList.innerHTML = `<p class="text-center text-gray-500">Aún no hay ensayos registrados.</p>`;
+                    return;
+                }
+                rehearsals.sort((a, b) => new Date(b.date) - new Date(a.date));
+                rehearsals.forEach(rehearsal => {
+                    const songInfoHtml = rehearsal.songs.map(song => 
+                        `<div class="text-sm font-medium text-gray-700">${song.name} (${calculateAverage(song.ratings)})</div>`
+                    ).join('');
+
+                    const rehearsalEl = document.createElement('div');
+                    rehearsalEl.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'flex', 'flex-col', 'space-y-2');
+                    rehearsalEl.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-base font-semibold text-gray-800">
+                                    Ensayo del ${rehearsal.date}
+                                    <span class="text-sm text-gray-500 font-normal">(${rehearsal.duration} min)</span>
+                                </p>
+                            </div>
+                            <button data-id="${rehearsal.id}" class="delete-rehearsal-btn bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
+                                    <path d="M3 6h18"/>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                    <line x1="10" x2="10" y1="11" y2="17"/>
+                                    <line x1="14" x2="14" y1="11" y2="17"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="flex flex-col space-y-1 mt-2">
+                            ${songInfoHtml}
+                        </div>
+                    `;
+                    rehearsalHistoryList.appendChild(rehearsalEl);
+                });
+            }
+
+            function calculateAverage(ratings) {
+                if (!ratings || ratings.length === 0) return 'N/A';
+                const sum = ratings.reduce((total, rating) => total + rating, 0);
+                return (sum / ratings.length).toFixed(2);
+            }
+
+            function renderCurrentSongRatings(ratings) {
+                currentSongRatingsListEl.innerHTML = '';
+                if (ratings.length === 0) {
+                    currentSongRatingsListEl.innerHTML = '<span class="text-gray-500">Sin calificaciones aún.</span>';
+                }
+                else {
+                    ratings.forEach(rating => {
+                        const ratingSpan = document.createElement('span');
+                        ratingSpan.classList.add('bg-gray-200', 'text-gray-700', 'font-bold', 'px-3', 'py-1', 'rounded-full');
+                        ratingSpan.innerText = rating;
+                        currentSongRatingsListEl.appendChild(ratingSpan);
+                    });
+                }
+                currentSongAverageRatingEl.innerText = `Promedio: ${calculateAverage(ratings)}`;
+            }
+
+            // --- Member Management ---
+            async function openMembersModal(groupId, groupName) {
+                console.log("openMembersModal called with groupId: " + groupId);
+                membersGroupName.textContent = groupName;
+                membersModal.dataset.groupId = groupId;
+                
+                const group = userGroups.find(g => g.id === groupId);
+                if (!group) return;
+
+                membersList.innerHTML = '<div class="text-center text-gray-500 p-2">Cargando miembros...</div>';
+                
+                const memberUIDs = Object.keys(group.members);
+                const userDocs = await Promise.all(memberUIDs.map(uid => getDoc(doc(db, 'users', uid))));
+                const memberDetails = userDocs
+                    .filter(doc => doc.exists())
+                    .map(userDoc => ({
+                        uid: userDoc.id,
+                        ...userDoc.data()
+                    }));
+
+                renderMembers(group, memberDetails);
+                membersModal.style.display = 'flex';
+            }
+
+            function renderMembers(group, memberDetails) {
+                membersList.innerHTML = '';
+                memberDetails.forEach(member => {
+                    const memberEl = document.createElement('div');
+                    memberEl.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-lg';
+                    
+                    const memberInfo = document.createElement('div');
+                    memberInfo.className = 'text-left';
+                    memberInfo.innerHTML = `
+                        <p class="font-semibold text-gray-800">${member.name || member.email}</p>
+                        <p class="text-sm text-gray-500">${member.email}</p>
+                    `;
+
+                    const memberActions = document.createElement('div');
+                    memberActions.className = 'flex items-center space-x-2';
+
+                    const roleSelect = document.createElement('select');
+                    roleSelect.className = 'p-1 rounded-md border-gray-300';
+                    roleSelect.dataset.uid = member.uid;
+                    
+                    const optionAdmin = document.createElement('option');
+                    optionAdmin.value = 'admin';
+                    optionAdmin.textContent = 'Admin';
+                    if (group.members[member.uid] === 'admin') optionAdmin.selected = true;
+                    
+                    const optionReader = document.createElement('option');
+                    optionReader.value = 'reader';
+                    optionReader.textContent = 'Lector';
+                    if (group.members[member.uid] === 'reader') optionReader.selected = true;
+
+                    const optionCreator = document.createElement('option');
+                    optionCreator.value = 'creator';
+                    optionCreator.textContent = 'Creador';
+                    if (group.members[member.uid] === 'creator') optionCreator.selected = true;
+
+                    roleSelect.appendChild(optionAdmin);
+                    roleSelect.appendChild(optionCreator);
+                    roleSelect.appendChild(optionReader);
+                    
+                    if (group.owner === member.uid) {
+                        roleSelect.disabled = true;
+                    }
+
+                    roleSelect.addEventListener('change', (e) => {
+                        updateMemberRole(group.id, member.uid, e.target.value);
+                    });
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600';
+                    removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
+                    
+                    if (group.owner === member.uid) {
+                        removeBtn.disabled = true;
+                        removeBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        removeBtn.addEventListener('click', () => {
+                            removeMember(group.id, member.uid);
+                        });
+                    }
+
+                    memberActions.appendChild(roleSelect);
+                    memberActions.appendChild(removeBtn);
+                    
+                    memberEl.appendChild(memberInfo);
+                    memberEl.appendChild(memberActions);
+                    membersList.appendChild(memberEl);
+                });
+            }
+
+            async function updateMemberRole(groupId, memberUid, newRole) {
+                const groupRef = doc(db, 'groups', groupId);
+                try {
+                    await updateDoc(groupRef, {
+                        [`members.${memberUid}`]: newRole
+                    });
+                    showMessage('Rol actualizado correctamente.');
+                } catch (error) {
+                    console.error("Error updating role:", error);
+                    showMessage('Error al actualizar el rol.');
+                }
+            }
+
+            async function removeMember(groupId, memberUid) {
+                const groupRef = doc(db, 'groups', groupId);
+                try {
+                    await updateDoc(groupRef, {
+                        [`members.${memberUid}`]: deleteField()
+                    });
+                    showMessage('Miembro eliminado correctamente.');
+                } catch (error) {
+                    console.error("Error removing member:", error);
+                    showMessage('Error al eliminar el miembro.');
+                }
+            }
+
+            inviteMemberForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = newMemberEmailInput.value.trim();
+                const role = document.getElementById('new-member-role').value;
+                const groupId = membersModal.dataset.groupId;
+                const user = auth.currentUser;
+
+                if (email && groupId && user) {
+                    try {
+                        const idToken = await user.getIdToken();
+                        const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+                        const projectId = firebaseConfig.projectId;
+                        const functionUrl = isLocal 
+                            ? `http://localhost:5001/${projectId}/us-central1/inviteUserToGroup`
+                            : `https://us-central1-${projectId}.cloudfunctions.net/inviteUserToGroup`;
+
+                        const response = await fetch(functionUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${idToken}`
+                            },
+                            body: JSON.stringify({ data: { email, groupId, role } })
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(result.error.message || 'An unknown error occurred.');
+                        }
+
+                        showMessage(result.data.message);
+                        newMemberEmailInput.value = '';
+                    } catch (error) {
+                        console.error("Error inviting user:", error);
+                        showMessage(`Error: ${error.message}`);
+                    }
+                }
+            });
+
+            // --- Event Listeners and Logic ---
+
+            loginBtn.addEventListener('click', async () => {
+                const provider = new GoogleAuthProvider();
+                try {
+                    await signInWithPopup(auth, provider);
+                } catch (error) {
+                    console.error("Error durante el inicio de sesión con Google:", error);
+                    showMessage("Error al iniciar sesión: " + error.message);
+                }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                }
+                catch (error) {
+                    console.error("Error durante el cierre de sesión:", error);
+                    showMessage("Error al cerrar sesión.");
+                }
+            });
+
+            createGroupBtn.addEventListener('click', () => {
+                createGroupModal.style.display = 'flex';
+            });
+
+            createGroupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const groupName = newGroupNameInput.value.trim();
+                if (groupName && userId) {
+                    try {
+                        const groupsCollectionRef = collection(db, 'groups');
+                        await addDoc(groupsCollectionRef, {
+                            name: groupName,
+                            owner: userId,
+                            createdAt: new Date(),
+                            members: {
+                                [userId]: 'admin'
+                            }
+                        });
+                        newGroupNameInput.value = '';
+                        createGroupModal.style.display = 'none';
+                    } catch (error) {
+                        console.error("Error creating group:", error);
+                        showMessage("Error al crear el grupo.");
+                    }
+                }
+            });
+
+            groupsList.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button && !button.dataset.groupName) { // Ensure it's not the manage button
+                    const groupId = button.dataset.groupId;
+                    selectGroup(groupId);
+                }
+            });
+
+            addSongForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const songName = newSongInput.value.trim();
+                const pdfLink = pdfLinkInput.value.trim();
+                const videoLink = videoLinkInput.value.trim();
+
+                if (songName === "") {
+                    showMessage("El nombre de la canción no puede estar vacío.");
+                    return;
+                }
+                if (!userId || !selectedGroupId) {
+                    showMessage("Debes seleccionar un grupo para añadir canciones.");
+                    return;
+                }
+                try {
+                    const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
+                    await addDoc(songsCollectionRef, { 
+                        name: songName,
+                        pdfLink: pdfLink,
+                        videoLink: videoLink,
+                        createdBy: userId,
+                        createdAt: new Date()
+                    });
+                    newSongInput.value = '';
+                    pdfLinkInput.value = '';
+                    videoLinkInput.value = '';
+                } catch (e) {
+                    console.error("Error al añadir la canción:", e);
+                    showMessage("Error al añadir la canción. Intente de nuevo.");
+                }
+            });
+
+            newRehearsalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const date = document.getElementById('rehearsal-date').value;
+                const duration = parseInt(document.getElementById('rehearsal-duration').value, 10);
+                const selectedSongs = Array.from(document.querySelectorAll('input[name="selected-song"]:checked')).map(cb => ({
+                    id: cb.value,
+                    name: cb.dataset.name,
+                    pdfLink: cb.dataset.pdfLink,
+                    videoLink: cb.dataset.videoLink,
+                    ratings: []
+                }));
+
+                if (selectedSongs.length === 0) {
+                    showMessage("Debes seleccionar al menos un tema para el ensayo.");
+                    return;
+                }
+                if (duration <= 0) {
+                    showMessage("La duración del ensayo debe ser al menos 1 minuto.");
+                    return;
+                }
+
+                rehearsalSession.isActive = true;
+                rehearsalSession.date = date;
+                rehearsalSession.duration = duration;
+                rehearsalSession.selectedSongs = selectedSongs;
+                rehearsalSession.currentSongIndex = 0;
+                rehearsalSession.totalTimeElapsed = 0;
+                rehearsalSession.songTimeAllotted = (duration * 60) / selectedSongs.length;
                 rehearsalSession.songTimeRemaining = rehearsalSession.songTimeAllotted;
+                
                 renderCurrentSongRatings(rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex].ratings);
                 renderSongLinks();
+
+                mainView.classList.add('hidden');
+                rehearsalView.classList.remove('hidden');
+                singleSongHistoryView.classList.add('hidden');
                 startSongTimer();
-            } else {
-                showMessage("Has completado todos los temas. Puedes terminar el ensayo.");
-            }
-        });
-
-        finishRehearsalBtn.addEventListener('click', async () => {
-            if (rehearsalSession.timerInterval) {
-                clearInterval(rehearsalSession.timerInterval);
-            }
-            if (!userId || !selectedGroupId) {
-                showMessage("Error. La sesión no se puede guardar. Por favor, recargue la página.");
-                return;
-            }
-
-            try {
-                const rehearsalsCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
-                const songsToSave = rehearsalSession.selectedSongs.map(song => ({
-                    name: song.name,
-                    ratings: song.ratings,
-                    averageRating: calculateAverage(song.ratings)
-                }));
-                await addDoc(rehearsalsCollectionRef, {
-                    date: rehearsalSession.date,
-                    duration: rehearsalSession.duration,
-                    songs: songsToSave,
-                    timestamp: new Date(),
-                    userId: userId
-                });
-            } catch (e) {
-                console.error("Error saving the rehearsal:", e);
-                showMessage("Error al guardar el ensayo. Por favor, vuelva a intentarlo.");
-            }
-
-            rehearsalSession.isActive = false;
-            rehearsalSession.currentSongIndex = 0;
-            rehearsalSession.songTimeRemaining = 0;
-            rehearsalSession.totalTimeElapsed = 0;
-            rehearsalView.classList.add('hidden');
-            mainView.classList.remove('hidden');
-            singleSongHistoryView.classList.add('hidden');
-        });
-        
-        rehearsalHistoryList.addEventListener('click', async (e) => {
-            const button = e.target.closest('.delete-rehearsal-btn');
-            if (button) {
-                rehearsalIdToDelete = button.dataset.id;
-                showMessage("¿Estás seguro de que quieres eliminar este ensayo?", true);
-            }
-        });
-
-        confirmDeleteBtn.addEventListener('click', async () => {
-            if (!rehearsalIdToDelete) return;
-            
-            if (!userId || !selectedGroupId) {
-                showMessage("Error. No se puede eliminar el ensayo. Por favor, recargue la página.");
-                return;
-            }
-            
-            try {
-                const rehearsalDocRef = doc(db, `groups/${selectedGroupId}/rehearsals`, rehearsalIdToDelete);
-                await deleteDoc(rehearsalDocRef);
-                showMessage("Ensayo eliminado con éxito.");
-            } catch (e) {
-                console.error("Error deleting the rehearsal:", e);
-                showMessage("Error al eliminar el ensayo. Vuelva a intentarlo.");
-            } finally {
-                rehearsalIdToDelete = null;
-                hideModal();
-            }
-        });
-
-        cancelDeleteBtn.addEventListener('click', () => {
-            hideModal();
-        });
-
-        songsListClickable.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (button) {
-                const songId = button.dataset.songId;
-                const songName = button.dataset.songName;
-                showSongHistory(songId, songName);
-            }
-        });
-
-        function showSongHistory(songId, songName) {
-            mainView.classList.add('hidden');
-            rehearsalView.classList.add('hidden');
-            singleSongHistoryView.classList.remove('hidden');
-            
-            if (songChart) {
-                songChart.destroy();
-            }
-
-            songHistoryTitle.innerText = songName;
-            songHistoryList.innerHTML = '';
-            
-            const relevantEntries = allRehearsals
-                .map(rehearsal => {
-                    const songEntry = rehearsal.songs.find(s => s.name === songName);
-                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
-                })
-                .filter(entry => entry !== null);
-            
-            if (relevantEntries.length === 0) {
-                songHistoryList.innerHTML = `<p class="text-center text-gray-500">No hay datos de calificación para este tema aún.</p>`;
-                songHistoryAverage.innerText = '0.00';
-                return;
-            }
-
-            let totalRating = 0;
-            let ratingCount = 0;
-            const chartLabels = [];
-            const chartData = [];
-            const ratingsByDate = {};
-
-            relevantEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            relevantEntries.forEach(entry => {
-                const average = calculateAverage(entry.ratings);
-                totalRating += parseFloat(average) * entry.ratings.length;
-                ratingCount += entry.ratings.length;
-                ratingsByDate[entry.date] = average;
-
-                chartLabels.push(entry.date);
-                chartData.push(parseFloat(average));
-
-                const rehearsalEntry = document.createElement('div');
-                rehearsalEntry.classList.add('p-4', 'bg-white', 'rounded-xl', 'shadow-md');
-                rehearsalEntry.innerHTML = `
-                    <p class="text-gray-800 font-semibold mb-1">Ensayo del ${entry.date}</p>
-                    <p class="text-sm text-gray-600 mb-2">Calificaciones: ${entry.ratings.join(', ')}</p>
-                    <p class="text-lg font-bold text-indigo-600">Promedio: ${average}</p>
-                `;
-                songHistoryList.appendChild(rehearsalEntry);
             });
 
-            const ctx = document.getElementById('song-history-chart').getContext('2d');
-            songChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Calificación Promedio',
-                        data: chartData,
-                        borderColor: 'rgb(79, 70, 229)',
-                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
-                        tension: 0.2,
-                        pointBackgroundColor: 'rgb(79, 70, 229)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgb(79, 70, 229)',
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, max: 5, title: { display: true, text: 'Calificación', font: { weight: 'bold' } } },
-                        x: { title: { display: true, text: 'Fecha del Ensayo', font: { weight: 'bold' } } }
-                    },
-                    plugins: { legend: { display: false } }
+            function startSongTimer() {
+                if (rehearsalSession.timerInterval) {
+                    clearInterval(rehearsalSession.timerInterval);
                 }
-            });
-
-            const overallAverage = ratingCount > 0 ? (totalRating / ratingCount).toFixed(2) : '0.00';
-            songHistoryAverage.innerText = overallAverage;
-            
-            currentCalendarDate = new Date();
-            renderCalendar(ratingsByDate);
-        }
-
-        toggleViewBtn.addEventListener('click', () => {
-            const isChartView = !chartView.classList.contains('hidden');
-            chartView.classList.toggle('hidden', isChartView);
-            calendarView.classList.toggle('hidden', !isChartView);
-            chartIcon.classList.toggle('hidden', isChartView);
-            calendarIcon.classList.toggle('hidden', !isChartView);
-        });
-
-        function renderCalendar(ratingsData) {
-            calendarGrid.innerHTML = '';
-            const year = currentCalendarDate.getFullYear();
-            const month = currentCalendarDate.getMonth();
-            const monthName = new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
-            currentMonthDisplay.innerText = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-
-            const firstDayOfMonth = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                calendarGrid.appendChild(document.createElement('div'));
-            }
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const cell = document.createElement('div');
-                cell.classList.add('p-2', 'rounded-xl', 'text-center', 'font-bold', 'flex', 'flex-col', 'items-center', 'justify-center', 'shadow-inner');
-                const currentDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                updateRehearsalDisplay();
                 
-                if (ratingsData[currentDate]) {
-                    cell.classList.add('bg-indigo-200');
-                    cell.innerHTML = `<span class="text-sm text-gray-800">${day}</span><span class="text-xs text-indigo-700 font-semibold mt-1">${ratingsData[currentDate]}</span>`;
-                } else {
-                    cell.classList.add('bg-gray-100', 'text-gray-400');
-                    cell.innerHTML = `<span class="text-sm">${day}</span>`;
-                }
-                calendarGrid.appendChild(cell);
+                rehearsalSession.timerInterval = setInterval(() => {
+                    rehearsalSession.songTimeRemaining--;
+                    rehearsalSession.totalTimeElapsed++;
+                    updateRehearsalDisplay();
+                    
+                    if (rehearsalSession.songTimeRemaining <= 0) {
+                        clearInterval(rehearsalSession.timerInterval);
+                        showMessage("¡Tiempo terminado para este tema! Presiona Siguiente para continuar.");
+                    }
+                }, 1000);
             }
-        }
 
-        function navigateCalendar(offset) {
-            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
-            const songName = songHistoryTitle.innerText;
-            const relevantEntries = allRehearsals
-                .map(rehearsal => {
-                    const songEntry = rehearsal.songs.find(s => s.name === songName);
-                    return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
-                })
-                .filter(entry => entry !== null);
-            const ratingsByDate = {};
-            relevantEntries.forEach(entry => {
-                ratingsByDate[entry.date] = calculateAverage(entry.ratings);
+            function updateRehearsalDisplay() {
+                const currentSong = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
+                currentSongTitleEl.innerText = currentSong.name;
+                songTimerEl.innerText = formatTime(rehearsalSession.songTimeRemaining);
+                totalTimeDisplayEl.innerText = `Tiempo total transcurrido: ${formatTime(rehearsalSession.totalTimeElapsed)}`;
+                const progressPercentage = (rehearsalSession.songTimeAllotted - rehearsalSession.songTimeRemaining) / rehearsalSession.songTimeAllotted * 100;
+                progressFillEl.style.width = `${Math.min(100, progressPercentage)}%`;
+            }
+
+            function renderSongHistoryLinks(song) {
+                songHistoryLinks.innerHTML = '';
+                if (!song) return;
+
+                let linksHtml = '';
+                if (song.pdfLink) {
+                    linksHtml += `<a href="${song.pdfLink}" target="_blank" class="text-blue-500 hover:underline">Partitura (PDF)</a>`;
+                }
+                if (song.videoLink) {
+                    linksHtml += `${linksHtml ? '<br>' : ''}<a href="${song.videoLink}" target="_blank" class="text-blue-500 hover:underline">Video</a>`;
+                }
+
+                const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
+                if (selectedGroup && selectedGroup.members[userId] === 'admin') {
+                    linksHtml += `<button data-song-id="${song.id}" class="edit-song-links-btn bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600 ml-4">Editar</button>`;
+                }
+
+                songHistoryLinks.innerHTML = linksHtml || '<p class="text-gray-500">No hay enlaces para este tema.</p>';
+            }
+
+            function showSongHistory(songId, songName) {
+                mainView.classList.add('hidden');
+                rehearsalView.classList.add('hidden');
+                singleSongHistoryView.classList.remove('hidden');
+                
+                if (songChart) {
+                    songChart.destroy();
+                }
+
+                songHistoryTitle.innerText = songName;
+                songHistoryList.innerHTML = '';
+                
+                const song = allSongs.find(s => s.id === songId);
+                console.log('Song object in showSongHistory:', song); // Added for debugging
+                renderSongHistoryLinks(song);
+                
+                const relevantEntries = allRehearsals
+                    .map(rehearsal => {
+                        const songEntry = rehearsal.songs.find(s => s.name === songName);
+                        return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
+                    })
+                    .filter(entry => entry !== null);
+                
+                if (relevantEntries.length === 0) {
+                    songHistoryList.innerHTML = `<p class="text-center text-gray-500">No hay datos de calificación para este tema aún.</p>`;
+                    songHistoryAverage.innerText = '0.00';
+                    return;
+                }
+
+                let totalRating = 0;
+                let ratingCount = 0;
+                const chartLabels = [];
+                const chartData = [];
+                const ratingsByDate = {};
+
+                relevantEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                relevantEntries.forEach(entry => {
+                    const average = calculateAverage(entry.ratings);
+                    totalRating += parseFloat(average) * entry.ratings.length;
+                    ratingCount += entry.ratings.length;
+                    ratingsByDate[entry.date] = average;
+
+                    chartLabels.push(entry.date);
+                    chartData.push(parseFloat(average));
+
+                    const rehearsalEntry = document.createElement('div');
+                    rehearsalEntry.classList.add('p-4', 'bg-white', 'rounded-xl', 'shadow-md');
+                    rehearsalEntry.innerHTML = `
+                        <p class="text-gray-800 font-semibold mb-1">Ensayo del ${entry.date}</p>
+                        <p class="text-sm text-gray-600 mb-2">Calificaciones: ${entry.ratings.join(', ')}</p>
+                        <p class="text-lg font-bold text-indigo-600">Promedio: ${average}</p>
+                    `;
+                    songHistoryList.appendChild(rehearsalEntry);
+                });
+
+                const ctx = document.getElementById('song-history-chart').getContext('2d');
+                songChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Calificación Promedio',
+                            data: chartData,
+                            borderColor: 'rgb(79, 70, 229)',
+                            backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                            tension: 0.2,
+                            pointBackgroundColor: 'rgb(79, 70, 229)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(79, 70, 229)',
+                            fill: true,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 5, title: { display: true, text: 'Calificación', font: { weight: 'bold' } } },
+                            x: { title: { display: true, text: 'Fecha del Ensayo', font: { weight: 'bold' } } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                const overallAverage = ratingCount > 0 ? (totalRating / ratingCount).toFixed(2) : '0.00';
+                songHistoryAverage.innerText = overallAverage;
+                
+                currentCalendarDate = new Date();
+                renderCalendar(ratingsByDate);
+            }
+
+            toggleViewBtn.addEventListener('click', () => {
+                const isChartView = !chartView.classList.contains('hidden');
+                chartView.classList.toggle('hidden', isChartView);
+                calendarView.classList.toggle('hidden', !isChartView);
+                chartIcon.classList.toggle('hidden', isChartView);
+                calendarIcon.classList.toggle('hidden', !isChartView);
             });
-            renderCalendar(ratingsByDate);
-        }
 
-        prevMonthBtn.addEventListener('click', () => navigateCalendar(-1));
-        nextMonthBtn.addEventListener('click', () => navigateCalendar(1));
-        
-        backToMainBtn.addEventListener('click', () => {
-            singleSongHistoryView.classList.add('hidden');
-            mainView.classList.remove('hidden');
+            function renderCalendar(ratingsData) {
+                calendarGrid.innerHTML = '';
+                const year = currentCalendarDate.getFullYear();
+                const month = currentCalendarDate.getMonth();
+                const monthName = new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+                currentMonthDisplay.innerText = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDayOfMonth; i++) {
+                    calendarGrid.appendChild(document.createElement('div'));
+                }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('p-2', 'rounded-xl', 'text-center', 'font-bold', 'flex', 'flex-col', 'items-center', 'justify-center', 'shadow-inner');
+                    const currentDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    if (ratingsData[currentDate]) {
+                        cell.classList.add('bg-indigo-200');
+                        cell.innerHTML = `<span class="text-sm text-gray-800">${day}</span><span class="text-xs text-indigo-700 font-semibold mt-1">${ratingsData[currentDate]}</span>`;
+                    } else {
+                        cell.classList.add('bg-gray-100', 'text-gray-400');
+                        cell.innerHTML = `<span class="text-sm">${day}</span>`;
+                    }
+                    calendarGrid.appendChild(cell);
+                }
+            }
+
+            function navigateCalendar(offset) {
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + offset);
+                const songName = songHistoryTitle.innerText;
+                const relevantEntries = allRehearsals
+                    .map(rehearsal => {
+                        const songEntry = rehearsal.songs.find(s => s.name === songName);
+                        return songEntry ? { date: rehearsal.date, ratings: songEntry.ratings } : null;
+                    })
+                    .filter(entry => entry !== null);
+                const ratingsByDate = {};
+                relevantEntries.forEach(entry => {
+                    ratingsByDate[entry.date] = calculateAverage(entry.ratings);
+                });
+                renderCalendar(ratingsByDate);
+            }
+
+            prevMonthBtn.addEventListener('click', () => navigateCalendar(-1));
+            nextMonthBtn.addEventListener('click', () => navigateCalendar(1));
+            
+            backToMainBtn.addEventListener('click', () => {
+                singleSongHistoryView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+            });
+
+            initFirebase(); // Call initFirebase here
         });
-
-        window.onload = initFirebase;
     </script>
 </body>
 </html>
