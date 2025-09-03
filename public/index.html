@@ -340,6 +340,9 @@
         let rehearsalIdToDelete = null;
         let songChart = null; // Variable for the chart instance
         let currentCalendarDate = new Date(); // New state for the calendar view
+        let unsubscribeGroups = null;
+        let unsubscribeSongs = null;
+        let unsubscribeHistory = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             // Get DOM elements
@@ -503,6 +506,19 @@
                             userId = null;
                             loginView.classList.remove('hidden');
                             mainContainer.classList.add('hidden');
+
+                            // Clean up listeners and state
+                            if (unsubscribeGroups) unsubscribeGroups();
+                            if (unsubscribeSongs) unsubscribeSongs();
+                            if (unsubscribeHistory) unsubscribeHistory();
+                            allSongs = [];
+                            allRehearsals = [];
+                            userGroups = [];
+                            selectedGroupId = null;
+                            groupsList.innerHTML = '';
+                            songsListCheckboxes.innerHTML = '';
+                            songsListClickable.innerHTML = '';
+                            rehearsalHistoryList.innerHTML = '';
                         }
                     });
                 } catch (error) {
@@ -527,10 +543,11 @@
 
             function listenForGroups() {
                 if (!userId) return;
+                if (unsubscribeGroups) unsubscribeGroups();
                 const groupsCollectionRef = collection(db, 'groups');
                 const q = query(groupsCollectionRef, where(`members.${userId}`, 'in', ['admin', 'reader', 'creator']));
 
-                onSnapshot(q, (snapshot) => {
+                unsubscribeGroups = onSnapshot(q, (snapshot) => {
                     userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderGroups();
                     if (!selectedGroupId && userGroups.length > 0) {
@@ -621,8 +638,9 @@
             
             function listenForSongs() {
                 if (!selectedGroupId) return;
+                if (unsubscribeSongs) unsubscribeSongs();
                 const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
-                onSnapshot(songsCollectionRef, (snapshot) => {
+                unsubscribeSongs = onSnapshot(songsCollectionRef, (snapshot) => {
                     allSongs = snapshot.docs.map(doc => ({ 
                         id: doc.id, 
                         name: doc.data().name,
@@ -676,8 +694,9 @@
 
             function listenForRehearsalHistory() {
                 if (!selectedGroupId) return;
+                if (unsubscribeHistory) unsubscribeHistory();
                 const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
-                onSnapshot(historyCollectionRef, (snapshot) => {
+                unsubscribeHistory = onSnapshot(historyCollectionRef, (snapshot) => {
                     allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderRehearsalHistory(allRehearsals);
                     loadingHistory.classList.add('hidden');
@@ -734,7 +753,7 @@
 
             function renderCurrentSongRatings(ratings) {
                 currentSongRatingsListEl.innerHTML = '';
-                if (ratings.length === 0) {
+                if (!ratings || ratings.length === 0) {
                     currentSongRatingsListEl.innerHTML = '<span class="text-gray-500">Sin calificaciones aún.</span>';
                 }
                 else {
@@ -1061,32 +1080,6 @@
                 }
             }
 
-            function renderSongLinks() {
-                const song = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
-                const songLinksContainer = document.getElementById('song-links');
-                songLinksContainer.innerHTML = ''; // Clear previous links
-
-                if (!song) return;
-
-                if (song.pdfLink) {
-                    const pdfButton = document.createElement('a');
-                    pdfButton.href = song.pdfLink;
-                    pdfButton.target = '_blank';
-                    pdfButton.textContent = 'Ver Partitura (PDF)';
-                    pdfButton.className = 'bg-blue-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-blue-600';
-                    songLinksContainer.appendChild(pdfButton);
-                }
-
-                if (song.videoLink) {
-                    const videoButton = document.createElement('a');
-                    videoButton.href = song.videoLink;
-                    videoButton.target = '_blank';
-                    videoButton.textContent = 'Ver Video';
-                    videoButton.className = 'bg-red-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-red-600';
-                    songLinksContainer.appendChild(videoButton);
-                }
-            }
-
             function startSongTimer() {
                 if (rehearsalSession.timerInterval) {
                     clearInterval(rehearsalSession.timerInterval);
@@ -1286,6 +1279,15 @@
             backToMainBtn.addEventListener('click', () => {
                 singleSongHistoryView.classList.add('hidden');
                 mainView.classList.remove('hidden');
+            });
+
+            songsListClickable.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button && button.dataset.songId) {
+                    const songId = button.dataset.songId;
+                    const songName = button.dataset.songName;
+                    showSongHistory(songId, songName);
+                }
             });
 
             rehearsalView.addEventListener('click', (e) => {
