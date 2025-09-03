@@ -79,53 +79,62 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
   });
 });
 
-exports.deleteGroup = functions.https.onCall(async (data, context) => {
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+exports.deleteGroup = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+        res.status(405).send('Method Not Allowed');
+        return;
     }
 
-    const uid = context.auth.uid;
-    const { groupId } = data;
-
-    if (!groupId) {
-        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with a "groupId" argument.');
+    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+        res.status(403).json({ error: { message: 'Unauthorized' } });
+        return;
     }
 
-    const db = admin.firestore();
-    const groupRef = db.collection('groups').doc(groupId);
+    let idToken;
+    try {
+        idToken = req.headers.authorization.split('Bearer ')[1];
+        const decodedIdToken = await admin.auth().verifyIdToken(idToken);
+        const uid = decodedIdToken.uid;
+        const { groupId } = req.body.data;
 
-    const groupDoc = await groupRef.get();
+        if (!groupId) {
+            res.status(400).json({ error: { message: 'Group ID is required.' } });
+            return;
+        }
 
-    if (!groupDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'Group not found.');
+        const db = admin.firestore();
+        const groupRef = db.collection('groups').doc(groupId);
+        const groupDoc = await groupRef.get();
+
+        if (!groupDoc.exists) {
+            res.status(404).json({ error: { message: 'Group not found.' } });
+            return;
+        }
+
+        const groupData = groupDoc.data();
+
+        if (groupData.owner !== uid || Object.keys(groupData.members).length !== 1) {
+            res.status(403).json({ error: { message: 'You do not have permission to delete this group.' } });
+            return;
+        }
+
+        const songsRef = groupRef.collection('songs');
+        const songsSnapshot = await songsRef.get();
+        const songDeletions = songsSnapshot.docs.map(doc => doc.ref.delete());
+
+        const rehearsalsRef = groupRef.collection('rehearsals');
+        const rehearsalsSnapshot = await rehearsalsRef.get();
+        const rehearsalDeletions = rehearsalsSnapshot.docs.map(doc => doc.ref.delete());
+
+        await Promise.all([...songDeletions, ...rehearsalDeletions]);
+        await groupRef.delete();
+
+        res.status(200).json({ data: { message: 'Group deleted successfully.' } });
+
+    } catch (error) {
+        console.error("Error deleting group:", error);
+        res.status(500).json({ error: { message: 'An unexpected error occurred.', details: error.message } });
     }
-
-    const groupData = groupDoc.data();
-
-    // Check if the user is the admin and the only member
-    if (groupData.owner !== uid || Object.keys(groupData.members).length !== 1) {
-        throw new functions.https.HttpsError('permission-denied', 'You do not have permission to delete this group.');
-    }
-
-    // Delete subcollections
-    const songsRef = groupRef.collection('songs');
-    const songsSnapshot = await songsRef.get();
-    const songDeletions = [];
-    songsSnapshot.forEach(doc => {
-        songDeletions.push(doc.ref.delete());
-    });
-    await Promise.all(songDeletions);
-
-    const rehearsalsRef = groupRef.collection('rehearsals');
-    const rehearsalsSnapshot = await rehearsalsRef.get();
-    const rehearsalDeletions = [];
-    rehearsalsSnapshot.forEach(doc => {
-        rehearsalDeletions.push(doc.ref.delete());
-    });
-    await Promise.all(rehearsalDeletions);
-
-    // Delete the group document
-    await groupRef.delete();
-
-    return { message: 'Group deleted successfully.' };
+  });
 });

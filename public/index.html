@@ -795,7 +795,7 @@
                     deleteBtn.className = 'w-full bg-red-600 text-white font-bold py-2 px-4 rounded-xl mt-4 transition-colors hover:bg-red-700';
                     deleteBtn.addEventListener('click', () => {
                         groupIdToDelete = groupId;
-                        showMessage(`¿Estás seguro de que quieres eliminar el grupo \"${group.name}\"? Esta acción es irreversible y borrará todas sus canciones y ensayos.`, true, 'group');
+                        showMessage(`¿Estás seguro de que quieres eliminar el grupo "${group.name}"? Esta acción es irreversible y borrará todas sus canciones y ensayos.`, true, 'group');
                     });
                     deleteGroupSection.appendChild(deleteBtn);
                 }
@@ -1367,17 +1367,39 @@
                 if (type === 'group') {
                     if (groupIdToDelete) {
                         try {
-                            const deleteGroup = httpsCallable(functions, 'deleteGroup');
-                            await deleteGroup({ groupId: groupIdToDelete });
+                            const user = auth.currentUser;
+                            if (!user) throw new Error("User not authenticated.");
+                            const idToken = await user.getIdToken();
+                            
+                            const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+                            const projectId = firebaseConfig.projectId;
+                            const functionUrl = isLocal 
+                                ? `http://localhost:5001/${projectId}/us-central1/deleteGroup`
+                                : `https://us-central1-${projectId}.cloudfunctions.net/deleteGroup`;
+
+                            const response = await fetch(functionUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${idToken}`
+                                },
+                                body: JSON.stringify({ data: { groupId: groupIdToDelete } })
+                            });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error.message || 'Failed to delete group.');
+                            }
+
                             showMessage('Grupo eliminado con éxito.');
-                            // The listener for groups will handle the UI update
+                            membersModal.style.display = 'none';
                         } catch (error) {
                             console.error('Error deleting group:', error);
                             showMessage(`Error al eliminar el grupo: ${error.message}`);
                         }
                         hideModal();
                     }
-                } // Add other deletion types here if needed
+                } 
             });
 
             initFirebase(); // Call initFirebase here
