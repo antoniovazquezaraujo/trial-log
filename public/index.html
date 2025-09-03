@@ -1366,6 +1366,10 @@
                 const type = confirmDeleteBtn.dataset.confirmationType;
                 if (type === 'group') {
                     if (groupIdToDelete) {
+                        // Unsubscribe from listeners before deleting
+                        if (unsubscribeSongs) unsubscribeSongs();
+                        if (unsubscribeHistory) unsubscribeHistory();
+
                         try {
                             const user = auth.currentUser;
                             if (!user) throw new Error("User not authenticated.");
