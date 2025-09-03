@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install and build functions
+      - name: Install function dependencies
         run: npm ci
         working-directory: functions
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}
-          target: dev
           projectId: gig-log-14233
+          firebaseConfigPath: firebase.dev.json
