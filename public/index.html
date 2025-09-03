@@ -1061,6 +1061,32 @@
                 }
             }
 
+            function renderSongLinks() {
+                const song = rehearsalSession.selectedSongs[rehearsalSession.currentSongIndex];
+                const songLinksContainer = document.getElementById('song-links');
+                songLinksContainer.innerHTML = ''; // Clear previous links
+
+                if (!song) return;
+
+                if (song.pdfLink) {
+                    const pdfButton = document.createElement('a');
+                    pdfButton.href = song.pdfLink;
+                    pdfButton.target = '_blank';
+                    pdfButton.textContent = 'Ver Partitura (PDF)';
+                    pdfButton.className = 'bg-blue-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-blue-600';
+                    songLinksContainer.appendChild(pdfButton);
+                }
+
+                if (song.videoLink) {
+                    const videoButton = document.createElement('a');
+                    videoButton.href = song.videoLink;
+                    videoButton.target = '_blank';
+                    videoButton.textContent = 'Ver Video';
+                    videoButton.className = 'bg-red-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-red-600';
+                    songLinksContainer.appendChild(videoButton);
+                }
+            }
+
             function startSongTimer() {
                 if (rehearsalSession.timerInterval) {
                     clearInterval(rehearsalSession.timerInterval);
