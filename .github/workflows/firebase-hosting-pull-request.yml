@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install and build functions
-        run: npm ci && npm run build
+      - name: Install function dependencies
+        run: npm ci
         working-directory: functions
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
