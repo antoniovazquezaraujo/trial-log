@@ -78,3 +78,54 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
     }
   });
 });
+
+exports.deleteGroup = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+    }
+
+    const uid = context.auth.uid;
+    const { groupId } = data;
+
+    if (!groupId) {
+        throw new functions.https.HttpsError('invalid-argument', 'The function must be called with a "groupId" argument.');
+    }
+
+    const db = admin.firestore();
+    const groupRef = db.collection('groups').doc(groupId);
+
+    const groupDoc = await groupRef.get();
+
+    if (!groupDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Group not found.');
+    }
+
+    const groupData = groupDoc.data();
+
+    // Check if the user is the admin and the only member
+    if (groupData.owner !== uid || Object.keys(groupData.members).length !== 1) {
+        throw new functions.https.HttpsError('permission-denied', 'You do not have permission to delete this group.');
+    }
+
+    // Delete subcollections
+    const songsRef = groupRef.collection('songs');
+    const songsSnapshot = await songsRef.get();
+    const songDeletions = [];
+    songsSnapshot.forEach(doc => {
+        songDeletions.push(doc.ref.delete());
+    });
+    await Promise.all(songDeletions);
+
+    const rehearsalsRef = groupRef.collection('rehearsals');
+    const rehearsalsSnapshot = await rehearsalsRef.get();
+    const rehearsalDeletions = [];
+    rehearsalsSnapshot.forEach(doc => {
+        rehearsalDeletions.push(doc.ref.delete());
+    });
+    await Promise.all(rehearsalDeletions);
+
+    // Delete the group document
+    await groupRef.delete();
+
+    return { message: 'Group deleted successfully.' };
+});

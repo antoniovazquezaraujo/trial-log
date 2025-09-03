@@ -296,6 +296,7 @@
                 </select>
                 <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl transition-colors hover:bg-green-600">Invitar</button>
             </form>
+            <div id="delete-group-section" class="border-t pt-4 mt-4"></div>
         </div>
     </div>
 
@@ -338,6 +339,7 @@
         let selectedGroupId = null;
         let userGroups = [];
         let rehearsalIdToDelete = null;
+        let groupIdToDelete = null; // New variable for group deletion
         let songChart = null; // Variable for the chart instance
         let currentCalendarDate = new Date(); // New state for the calendar view
         let unsubscribeGroups = null;
@@ -365,11 +367,7 @@
             const membersList = document.getElementById('members-list');
             const inviteMemberForm = document.getElementById('invite-member-form');
             const newMemberEmailInput = document.getElementById('new-member-email');
-            const editSongLinksModal = document.getElementById('edit-song-links-modal');
-            const closeEditLinksModal = document.getElementById('close-edit-links-modal');
-            const editSongLinksForm = document.getElementById('edit-song-links-form');
-            const editPdfLinkInput = document.getElementById('edit-pdf-link-input');
-            const editVideoLinkInput = document.getElementById('edit-video-link-input');
+            const deleteGroupSection = document.getElementById('delete-group-section');
             
             const mainView = document.getElementById('main-view');
             const rehearsalView = document.getElementById('rehearsal-view');
@@ -387,7 +385,7 @@
             const songHistoryList = document.getElementById('song-history-list');
             const songHistoryTitle = document.getElementById('song-history-title');
             const songHistoryAverage = document.getElementById('song-history-average').querySelector('span');
-            const songHistoryLinks = document.getElementById('song-history-links'); // This was the problematic line
+            const songHistoryLinks = document.getElementById('song-history-links');
             const loadingSongs = document.getElementById('loading-songs');
             const loadingSongsClickable = document.getElementById('loading-songs-clickable');
             const loadingHistory = document.getElementById('loading-history');
@@ -403,14 +401,14 @@
             const modal = document.getElementById('myModal');
             const modalMessage = document.getElementById('modal-message');
             const modalButtons = document.getElementById('modal-buttons');
-            const closeButton = document.querySelector('.close-button');
+            const closeButton = modal.querySelector('.close-button');
             const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
             const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
             const toggleViewBtn = document.getElementById('toggle-view-btn');
             const chartView = document.getElementById('chart-view');
             const calendarView = document.getElementById('calendar-view');
             const calendarIcon = document.getElementById('calendar-icon');
-            const chartIcon = document.getElementById('chart-icon');
+            const chartIcon = toggleViewBtn.querySelector('.lucide-area-chart');
             const prevMonthBtn = document.getElementById('prev-month-btn');
             const nextMonthBtn = document.getElementById('next-month-btn');
             const currentMonthDisplay = document.getElementById('current-month-display');
@@ -436,10 +434,11 @@
             };
             
             // Modal functions
-            function showMessage(message, isConfirmation = false) {
+            function showMessage(message, isConfirmation = false, confirmationType = null) {
                 modalMessage.innerText = message;
                 if (isConfirmation) {
                     modalButtons.classList.remove('hidden');
+                    confirmDeleteBtn.dataset.confirmationType = confirmationType;
                 } else {
                     modalButtons.classList.add('hidden');
                 }
@@ -449,6 +448,7 @@
             function hideModal() {
                 modal.style.display = 'none';
                 rehearsalIdToDelete = null;
+                groupIdToDelete = null;
             }
 
             closeButton.onclick = hideModal;
@@ -553,13 +553,20 @@
                     if (!selectedGroupId && userGroups.length > 0) {
                         selectGroup(userGroups[0].id);
                     } else if (selectedGroupId) {
-                        // If a group was selected, re-render members modal if it's open
+                        const groupExists = userGroups.some(g => g.id === selectedGroupId);
+                        if (!groupExists) {
+                            selectedGroupId = userGroups.length > 0 ? userGroups[0].id : null;
+                            if (selectedGroupId) {
+                                selectGroup(selectedGroupId);
+                            } else {
+                                mainView.classList.add('hidden');
+                            }
+                        }
                         if (membersModal.style.display === 'flex') {
                             const group = userGroups.find(g => g.id === selectedGroupId);
                             if (group) {
                                 openMembersModal(group.id, group.name);
                             } else {
-                                // The group may have been deleted or the user removed
                                 membersModal.style.display = 'none';
                             }
                         }
@@ -591,7 +598,6 @@
                         groupEl.addEventListener('click', () => selectGroup(group.id));
                         groupElWrapper.appendChild(groupEl);
 
-                        // Add manage button for admins
                         if (group.members[userId] === 'admin') {
                             const manageBtn = document.createElement('button');
                             manageBtn.textContent = 'Gestionar';
@@ -599,7 +605,6 @@
                             manageBtn.dataset.groupId = group.id;
                             manageBtn.dataset.groupName = group.name;
                             manageBtn.addEventListener('click', (e) => {
-                                console.log("Manage button clicked"); // Debug log
                                 e.stopPropagation();
                                 openMembersModal(group.id, group.name);
                             });
@@ -613,7 +618,7 @@
 
             function selectGroup(groupId) {
                 selectedGroupId = groupId;
-                renderGroups(); // Re-render to highlight the selected group
+                renderGroups();
                 listenForSongs();
                 listenForRehearsalHistory();
                 updateUIVisibility();
@@ -641,7 +646,7 @@
                 if (unsubscribeSongs) unsubscribeSongs();
                 const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
                 unsubscribeSongs = onSnapshot(songsCollectionRef, (snapshot) => {
-                    allSongs = snapshot.docs.map(doc => ({ 
+                    allSongs = snapshot.docs.map(doc => ({
                         id: doc.id, 
                         name: doc.data().name,
                         pdfLink: doc.data().pdfLink || null,
@@ -728,13 +733,7 @@
                                 </p>
                             </div>
                             <button data-id="${rehearsal.id}" class="delete-rehearsal-btn bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2">
-                                    <path d="M3 6h18"/>
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                    <line x1="10" x2="10" y1="11" y2="17"/>
-                                    <line x1="14" x2="14" y1="11" y2="17"/>
-                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
                             </button>
                         </div>
                         <div class="flex flex-col space-y-1 mt-2">
@@ -769,7 +768,6 @@
 
             // --- Member Management ---
             async function openMembersModal(groupId, groupName) {
-                console.log("openMembersModal called with groupId: " + groupId);
                 membersGroupName.textContent = groupName;
                 membersModal.dataset.groupId = groupId;
                 
@@ -777,7 +775,8 @@
                 if (!group) return;
 
                 membersList.innerHTML = '<div class="text-center text-gray-500 p-2">Cargando miembros...</div>';
-                
+                deleteGroupSection.innerHTML = ''; // Clear delete button
+
                 const memberUIDs = Object.keys(group.members);
                 const userDocs = await Promise.all(memberUIDs.map(uid => getDoc(doc(db, 'users', uid))));
                 const memberDetails = userDocs
@@ -788,6 +787,19 @@
                     }));
 
                 renderMembers(group, memberDetails);
+
+                // Show delete button if admin and last member
+                if (group.owner === userId && memberDetails.length === 1) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'Eliminar Grupo Permanentemente';
+                    deleteBtn.className = 'w-full bg-red-600 text-white font-bold py-2 px-4 rounded-xl mt-4 transition-colors hover:bg-red-700';
+                    deleteBtn.addEventListener('click', () => {
+                        groupIdToDelete = groupId;
+                        showMessage(`¿Estás seguro de que quieres eliminar el grupo \"${group.name}\"? Esta acción es irreversible y borrará todas sus canciones y ensayos.`, true, 'group');
+                    });
+                    deleteGroupSection.appendChild(deleteBtn);
+                }
+
                 membersModal.style.display = 'flex';
             }
 
@@ -1140,7 +1152,6 @@
                 songHistoryList.innerHTML = '';
                 
                 const song = allSongs.find(s => s.id === songId);
-                console.log('Song object in showSongHistory:', song); // Added for debugging
                 renderSongHistoryLinks(song);
                 
                 const relevantEntries = allRehearsals
@@ -1351,6 +1362,23 @@
 
             finishRehearsalBtn.addEventListener('click', finishRehearsal);
 
+            confirmDeleteBtn.addEventListener('click', async () => {
+                const type = confirmDeleteBtn.dataset.confirmationType;
+                if (type === 'group') {
+                    if (groupIdToDelete) {
+                        try {
+                            const deleteGroup = httpsCallable(functions, 'deleteGroup');
+                            await deleteGroup({ groupId: groupIdToDelete });
+                            showMessage('Grupo eliminado con éxito.');
+                            // The listener for groups will handle the UI update
+                        } catch (error) {
+                            console.error('Error deleting group:', error);
+                            showMessage(`Error al eliminar el grupo: ${error.message}`);
+                        }
+                        hideModal();
+                    }
+                } // Add other deletion types here if needed
+            });
 
             initFirebase(); // Call initFirebase here
         });
