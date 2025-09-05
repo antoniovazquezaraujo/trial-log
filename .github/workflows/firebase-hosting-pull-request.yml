@@ -16,9 +16,9 @@ jobs:
       - name: Install function dependencies
         run: npm ci
         working-directory: functions
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Authenticate to Google Cloud
+        uses: 'google-github-actions/auth@v2'
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}
-          projectId: trial-log
-          channelId: pr-${{ github.event.number }}
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}'
+      - name: Deploy to Firebase Preview Channel
+        run: npx firebase-tools hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project trial-log --json
