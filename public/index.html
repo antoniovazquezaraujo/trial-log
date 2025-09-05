@@ -326,13 +326,13 @@
         // Global variables provided by the canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = {
-          apiKey: "AIzaSyC5jn2BfYU8uj-uqJ6XaUjfBSpwYWY6nF0",
-          authDomain: "gig-log-14233.firebaseapp.com",
-          projectId: "gig-log-14233",
-          storageBucket: "gig-log-14233.firebasestorage.app",
-          messagingSenderId: "676482708006",
-          appId: "1:676482708006:web:f3b4e522759c8df791ace7",
-          measurementId: "G-4W2MHZX7N3"
+          apiKey: "CLAVE_ELIMINADA",
+          authDomain: "trial-log.firebaseapp.com",
+          projectId: "trial-log",
+          storageBucket: "trial-log.firebasestorage.app",
+          messagingSenderId: "587516118622",
+          appId: "1:587516118622:web:efdd101ebad85d9f30d6cf",
+          measurementId: "G-JST1QHYE13"
         };
 
         let db, auth, functions, userId;
@@ -1362,6 +1362,14 @@
 
             finishRehearsalBtn.addEventListener('click', finishRehearsal);
 
+            rehearsalHistoryList.addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.delete-rehearsal-btn');
+                if (deleteBtn) {
+                    rehearsalIdToDelete = deleteBtn.dataset.id;
+                    showMessage(`¿Estás seguro de que quieres eliminar este ensayo? Esta acción no se puede deshacer.`, true, 'rehearsal');
+                }
+            });
+
             confirmDeleteBtn.addEventListener('click', async () => {
                 const type = confirmDeleteBtn.dataset.confirmationType;
                 if (type === 'group') {
@@ -1403,7 +1411,19 @@
                         }
                         hideModal();
                     }
-                } 
+                } else if (type === 'rehearsal') {
+                    if (rehearsalIdToDelete && selectedGroupId) {
+                        try {
+                            const rehearsalRef = doc(db, 'groups', selectedGroupId, 'rehearsals', rehearsalIdToDelete);
+                            await deleteDoc(rehearsalRef);
+                            showMessage('Ensayo eliminado correctamente.');
+                        } catch (error) {
+                            console.error("Error deleting rehearsal:", error);
+                            showMessage(`Error al eliminar el ensayo: ${error.message}`);
+                        }
+                        hideModal();
+                    }
+                }
             });
 
             initFirebase(); // Call initFirebase here
