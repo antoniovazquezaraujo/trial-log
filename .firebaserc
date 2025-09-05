@@ -12,6 +12,13 @@
           "gig-log-14233"
         ]
       }
+    },
+    "trial-log": {
+      "hosting": {
+        "live": [
+          "trial-log"
+        ]
+      }
     }
   },
   "etags": {}
