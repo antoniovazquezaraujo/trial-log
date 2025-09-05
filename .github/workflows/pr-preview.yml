@@ -21,4 +21,21 @@ jobs:
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}'
       - name: Deploy to Firebase Preview Channel
-        run: npx firebase-tools hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project trial-log --json
+        id: deploy_preview
+        run: |
+          deploy_output=$(npx firebase-tools hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project trial-log --json)
+          echo "deploy_output<<EOF" >> $GITHUB_OUTPUT
+          echo "$deploy_output" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Post Preview URL to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = JSON.parse(`${{ steps.deploy_preview.outputs.deploy_output }}`);
+            const previewUrl = output.result.sites['trial-log'].url;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Preview URL:** ${previewUrl}`
+            });
