@@ -32,7 +32,7 @@ jobs:
         with:
           script: |
             const output = JSON.parse(`${{ steps.deploy_preview.outputs.deploy_output }}`);
-            const previewUrl = output.result.sites['trial-log'].url;
+            const previewUrl = output.result['trial-log'].url;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
