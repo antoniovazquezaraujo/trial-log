@@ -683,6 +683,7 @@
                     sortedSongsForRehearsal.forEach((song, index) => {
                         const li = document.createElement('li');
                         li.className = 'text-gray-700 p-2 rounded-md cursor-pointer transition-colors hover:bg-purple-100';
+                        console.log(`Song: ${song.name}, Average: ${song.average}`); // DEBUG LINE
                         if (song.average === -1) {
                             li.innerHTML = song.name;
                         } else {
