@@ -322,18 +322,10 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, doc, getDoc, setDoc, query, where, deleteDoc, updateDoc, deleteField, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+        import { firebaseConfig } from "/__/firebase/init.json";
 
         // Global variables provided by the canvas environment
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = {
-          apiKey: "CLAVE_ELIMINADA",
-          authDomain: "trial-log.firebaseapp.com",
-          projectId: "trial-log",
-          storageBucket: "trial-log.firebasestorage.app",
-          messagingSenderId: "587516118622",
-          appId: "1:587516118622:web:efdd101ebad85d9f30d6cf",
-          measurementId: "G-JST1QHYE13"
-        };
 
         let db, auth, functions, userId;
         let selectedGroupId = null;
@@ -1437,5 +1429,5 @@
             initFirebase(); // Call initFirebase here
         });
     </script>
-</body>
-</html>"<!-- test -->"
+</body><!-- Trigger redeploy -->
+</html>
