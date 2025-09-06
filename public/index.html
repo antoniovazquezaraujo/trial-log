@@ -684,9 +684,12 @@
                     sortedSongsForRehearsal.forEach((song, index) => {
                         const li = document.createElement('li');
                         li.className = 'text-gray-700 p-2 rounded-md cursor-pointer transition-colors hover:bg-purple-100 border border-red-500 bg-yellow-200 min-h-[30px]'; // DEBUG STYLES
-                        console.log(`Song: ${song.name}, Average: ${song.average}`); // DEBUG LINE
-                        const avgDisplay = song.average === -1 ? 'N/A' : song.average.toFixed(2); // Force N/A if -1
-                        li.innerHTML = `${song.name} (${avgDisplay})`; // Simplified for debugging
+                        if (song.average === -1) {
+                            li.innerHTML = song.name;
+                        } else {
+                            const avgDisplay = song.average.toFixed(2);
+                            li.innerHTML = `${song.name} <span class="font-bold text-sm text-purple-700">(${avgDisplay})</span>`;
+                        }
                         
                         li.addEventListener('click', () => {
                             rehearsalSongCount = index + 1;
