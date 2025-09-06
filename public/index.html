@@ -701,9 +701,10 @@
                         });
 
                         songListEl.appendChild(li);
+                        console.log("Appended LI:", li.outerHTML); // DEBUG
                     });
                 }
-            }
+                console.log("Final OL HTML:", songListEl.outerHTML); // DEBUG
 
             function renderSongsForHistory() {
                 songsListClickable.innerHTML = '';
