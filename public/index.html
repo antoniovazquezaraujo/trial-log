@@ -129,14 +129,10 @@
                         <input type="number" id="rehearsal-duration" min="1" value="60" required class="w-full p-2 rounded-xl border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
                     </div>
                     <div>
-                        <label for="rehearsal-song-quantity" class="block text-gray-700 font-semibold mb-1">Número de Temas a Ensayar:</label>
-                        <input type="number" id="rehearsal-song-quantity" min="1" value="3" required class="w-full p-2 rounded-xl border border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                    </div>
-                    <div>
                         <label class="block text-gray-700 font-semibold mb-1">Orden de Ensayo (peor a mejor nota):</label>
                         <div id="sorted-songs-list-container" class="p-2 bg-purple-50 rounded-lg">
                             <div id="loading-songs" class="text-center text-gray-500 p-2">Cargando temas...</div>
-                            <ol id="sorted-songs-list" class="list-decimal list-inside space-y-1"></ol>
+                            <ol id="sorted-songs-list" class="space-y-1"></ol>
                         </div>
                     </div>
                     <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-purple-700 shadow-md">
@@ -416,6 +412,7 @@
             // Rehearsal session state
             let allSongs = [];
             let sortedSongsForRehearsal = [];
+            let rehearsalSongCount = 0;
             let allRehearsals = []; // New variable to store all rehearsals
             let rehearsalSession = {
                 isActive: false,
@@ -673,29 +670,36 @@
                 sortedSongsForRehearsal = songsWithAvg.sort((a, b) => a.average - b.average);
 
                 const songListEl = document.getElementById('sorted-songs-list');
-                const quantityInput = document.getElementById('rehearsal-song-quantity');
                 const loadingEl = document.getElementById('loading-songs');
                 
                 songListEl.innerHTML = '';
+                rehearsalSongCount = 0; // Reset on render
+
                 if (sortedSongsForRehearsal.length === 0) {
                     loadingEl.innerText = 'Añade temas para empezar.';
                     loadingEl.style.display = 'block';
                 } else {
                     loadingEl.style.display = 'none';
-                    sortedSongsForRehearsal.forEach(song => {
+                    sortedSongsForRehearsal.forEach((song, index) => {
                         const li = document.createElement('li');
-                        li.className = 'text-gray-700';
+                        li.className = 'text-gray-700 p-2 rounded-md cursor-pointer transition-colors hover:bg-purple-100';
                         const avgDisplay = song.average === -1 ? 'N/A' : song.average.toFixed(2);
                         li.innerHTML = `${song.name} <span class="font-bold text-sm text-purple-700">(${avgDisplay})</span>`;
+                        
+                        li.addEventListener('click', () => {
+                            rehearsalSongCount = index + 1;
+                            const allItems = songListEl.querySelectorAll('li');
+                            allItems.forEach((item, itemIndex) => {
+                                if (itemIndex < rehearsalSongCount) {
+                                    item.classList.add('bg-purple-200');
+                                } else {
+                                    item.classList.remove('bg-purple-200');
+                                }
+                            });
+                        });
+
                         songListEl.appendChild(li);
                     });
-                }
-
-                if (quantityInput) {
-                    quantityInput.max = sortedSongsForRehearsal.length;
-                    if (parseInt(quantityInput.value) > sortedSongsForRehearsal.length) {
-                        quantityInput.value = sortedSongsForRehearsal.length;
-                    }
                 }
             }
 
@@ -1066,14 +1070,13 @@
                 e.preventDefault();
                 const date = document.getElementById('rehearsal-date').value;
                 const duration = parseInt(document.getElementById('rehearsal-duration').value, 10);
-                const quantity = parseInt(document.getElementById('rehearsal-song-quantity').value, 10);
 
-                if (isNaN(quantity) || quantity <= 0) {
-                    showMessage("Debes seleccionar un número válido de temas.");
+                if (rehearsalSongCount <= 0) {
+                    showMessage("Debes seleccionar al menos una canción de la lista.");
                     return;
                 }
 
-                const selectedSongs = sortedSongsForRehearsal.slice(0, quantity).map(song => ({
+                const selectedSongs = sortedSongsForRehearsal.slice(0, rehearsalSongCount).map(song => ({
                     ...song,
                     ratings: []
                 }));
