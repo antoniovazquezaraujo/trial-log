@@ -20,6 +20,8 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}'
+      - name: List files for debugging
+        run: ls -R
       - name: Deploy to Firebase Preview Channel
         id: deploy_preview
         run: |
