@@ -638,12 +638,12 @@
             }
             
             function listenForSongs() {
-                console.log("listenForSongs called. selectedGroupId:", selectedGroupId); // DEBUG
+                
                 if (!selectedGroupId) return;
                 if (unsubscribeSongs) unsubscribeSongs();
                 const songsCollectionRef = collection(db, `groups/${selectedGroupId}/songs`);
                 unsubscribeSongs = onSnapshot(songsCollectionRef, (snapshot) => {
-                    console.log("Songs snapshot received. Docs count:", snapshot.docs.length); // DEBUG
+                    
                     allSongs = snapshot.docs.map(doc => ({
                         id: doc.id, 
                         name: doc.data().name,
@@ -750,6 +750,7 @@
             function updateAllViews() {
                 renderSongsForHistory();
                 renderSongsForSelection();
+                renderRehearsalHistory(allRehearsals);
             }
 
             function renderSongsForHistory() {
@@ -781,7 +782,7 @@
             }
 
             function renderMainView() {
-                renderSongsForHistory();
+                // This function is now empty as its responsibilities have been moved to updateAllViews()
             }
 
             function listenForRehearsalHistory() {
@@ -790,6 +791,7 @@
                 const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
                 unsubscribeHistory = onSnapshot(historyCollectionRef, (snapshot) => {
                     allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
                     updateAllViews(); // Call the new common update function
                     loadingHistory.classList.add('hidden');
                 }, (error) => {
@@ -798,6 +800,8 @@
             }
 
             function renderRehearsalHistory(rehearsals) {
+                
+
                 rehearsalHistoryList.innerHTML = '';
                 if (rehearsals.length === 0) {
                     rehearsalHistoryList.innerHTML = `<p class="text-center text-gray-500">Aún no hay ensayos registrados.</p>`;
@@ -1452,18 +1456,18 @@
 
             finishRehearsalBtn.addEventListener('click', finishRehearsal);
 
-            console.log('Attempting to attach listener to rehearsalHistoryList');
+            
             if (rehearsalHistoryList) {
                 rehearsalHistoryList.addEventListener('click', (e) => {
-                    console.log('Click detected on history list. Target:', e.target);
+                    
                     const deleteBtn = e.target.closest('.delete-rehearsal-btn');
                     if (deleteBtn) {
-                        console.log('Delete button found!', deleteBtn);
+                        
                         rehearsalIdToDelete = deleteBtn.dataset.id;
                         showMessage(`¿Estás seguro de que quieres eliminar este ensayo? Esta acción no se puede deshacer.`, true, 'rehearsal');
                     }
                 });
-                console.log('Listener attached successfully.');
+                
             } else {
                 console.error('Error: rehearsalHistoryList element not found!');
             }
