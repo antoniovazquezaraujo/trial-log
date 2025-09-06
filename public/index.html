@@ -650,7 +650,7 @@
                         pdfLink: doc.data().pdfLink || null,
                         videoLink: doc.data().videoLink || null
                     }));
-                    renderMainView();
+                    updateAllViews(); // Call the new common update function
                     loadingSongs.classList.add('hidden');
                     loadingSongsClickable.classList.add('hidden');
                 }, (error) => {
@@ -674,7 +674,7 @@
                 const loadingEl = document.getElementById('loading-songs');
                 
                 songListEl.innerHTML = '';
-                rehearsalSongCount = 0; // Reset on render
+                rehearsalSongCount = 0; // Reset on render, or keep previous if user wants persistence
 
                 if (sortedSongsForRehearsal.length === 0) {
                     loadingEl.innerText = 'Añade temas para empezar.';
@@ -683,31 +683,74 @@
                     loadingEl.style.display = 'none';
                     sortedSongsForRehearsal.forEach((song, index) => {
                         const li = document.createElement('li');
-                        li.className = 'text-gray-700 p-2 rounded-md cursor-pointer transition-colors hover:bg-purple-100 border border-red-500 bg-yellow-200 min-h-[30px]'; // DEBUG STYLES
-                        if (song.average === -1) {
-                            li.innerHTML = song.name;
-                        } else {
-                            const avgDisplay = song.average.toFixed(2);
-                            li.innerHTML = `${song.name} <span class="font-bold text-sm text-purple-700">(${avgDisplay})</span>`;
-                        }
-                        
-                        li.addEventListener('click', () => {
-                            rehearsalSongCount = index + 1;
-                            const allItems = songListEl.querySelectorAll('li');
-                            allItems.forEach((item, itemIndex) => {
-                                if (itemIndex < rehearsalSongCount) {
-                                    item.classList.add('bg-purple-200');
-                                } else {
-                                    item.classList.remove('bg-purple-200');
-                                }
-                            });
+                        li.className = 'flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors hover:bg-purple-100'; 
+
+                        const avgDisplay = song.average === -1 ? 'N/A' : song.average.toFixed(2);
+                        const songText = `${song.name} <span class="font-bold text-sm text-purple-700">(${avgDisplay})</span>`;
+
+                        const checkboxId = `song-checkbox-${song.id}`;
+                        li.innerHTML = `
+                            <label for="${checkboxId}" class="flex items-center justify-between w-full cursor-pointer">
+                                <span class="text-gray-700">${songText}</span>
+                                <input type="checkbox" id="${checkboxId}" class="form-checkbox h-5 w-5 text-purple-600" data-index="${index}">
+                            </label>
+                        `;
+
+                        li.addEventListener('click', (event) => {
+                            const checkbox = li.querySelector('input[type="checkbox"]');
+                            const clickedIndex = parseInt(checkbox.dataset.index, 10);
+
+                            // If the click was on the checkbox itself, toggle its state
+                            if (event.target === checkbox) {
+                                checkbox.checked = !checkbox.checked; // Toggle the state
+                            } else {
+                                // If click was on the li (but not the checkbox), toggle the checkbox state
+                                checkbox.checked = !checkbox.checked;
+                            }
+
+                            // Update rehearsalSongCount based on the highest checked index
+                            // If a checkbox is checked, all above it should be checked.
+                            // If a checkbox is unchecked, all below it should be unchecked.
+                            if (checkbox.checked) {
+                                rehearsalSongCount = clickedIndex + 1;
+                            } else {
+                                rehearsalSongCount = clickedIndex;
+                            }
+
+                            updateSongSelectionVisuals(songListEl, rehearsalSongCount);
                         });
 
                         songListEl.appendChild(li);
-                        console.log("Appended LI:", li.outerHTML); // DEBUG
                     });
+
+                    // Initial update of visuals based on current rehearsalSongCount (which is 0 initially)
+                    updateSongSelectionVisuals(songListEl, rehearsalSongCount);
                 }
-                console.log("Final OL HTML:", songListEl.outerHTML); // DEBUG
+            }
+
+            // New helper function to update visual selection
+            function updateSongSelectionVisuals(songListElement, count) {
+                const allItems = songListElement.querySelectorAll('li');
+                allItems.forEach((item, itemIndex) => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    if (itemIndex < count) {
+                        item.classList.add('bg-purple-200');
+                        if (checkbox) checkbox.checked = true;
+                    } else {
+                        item.classList.remove('bg-purple-200');
+                        if (checkbox) checkbox.checked = false;
+                    }
+                });
+            }
+
+            function renderMainView() {
+                // This function is now empty as its responsibilities have been moved to updateAllViews()
+            }
+
+            function updateAllViews() {
+                renderSongsForHistory();
+                renderSongsForSelection();
+            }
 
             function renderSongsForHistory() {
                 songsListClickable.innerHTML = '';
@@ -747,8 +790,7 @@
                 const historyCollectionRef = collection(db, `groups/${selectedGroupId}/rehearsals`);
                 unsubscribeHistory = onSnapshot(historyCollectionRef, (snapshot) => {
                     allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    renderRehearsalHistory(allRehearsals);
-                    renderMainView();
+                    updateAllViews(); // Call the new common update function
                     loadingHistory.classList.add('hidden');
                 }, (error) => {
                     console.error("Error listening for rehearsal history:", error);
