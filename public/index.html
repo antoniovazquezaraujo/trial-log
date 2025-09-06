@@ -646,7 +646,7 @@
                         videoLink: doc.data().videoLink || null
                     }));
                     renderSongsForSelection();
-                    renderSongsForHistory();
+                    renderMainView();
                     loadingSongs.classList.add('hidden');
                     loadingSongsClickable.classList.add('hidden');
                 }, (error) => {
@@ -702,6 +702,10 @@
                 }
             }
 
+            function renderMainView() {
+                renderSongsForHistory();
+            }
+
             function listenForRehearsalHistory() {
                 if (!selectedGroupId) return;
                 if (unsubscribeHistory) unsubscribeHistory();
@@ -709,6 +713,7 @@
                 unsubscribeHistory = onSnapshot(historyCollectionRef, (snapshot) => {
                     allRehearsals = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     renderRehearsalHistory(allRehearsals);
+                    renderMainView();
                     loadingHistory.classList.add('hidden');
                 }, (error) => {
                     console.error("Error listening for rehearsal history:", error);
