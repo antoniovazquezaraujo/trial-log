@@ -680,11 +680,23 @@
                     songsListClickable.innerHTML = `<p class="text-center text-gray-500">Añade temas para ver el historial.</p>`;
                 } else {
                     allSongs.forEach(song => {
+                        const allRatingsForSong = allRehearsals
+                            .flatMap(rehearsal => rehearsal.songs)
+                            .filter(rehearsalSong => rehearsalSong.name === song.name)
+                            .flatMap(rehearsalSong => rehearsalSong.ratings || []);
+
+                        const average = calculateAverage(allRatingsForSong);
+
                         const button = document.createElement('button');
-                        button.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'text-left', 'hover:bg-indigo-200', 'transition-colors');
+                        button.classList.add('p-3', 'bg-white', 'rounded-xl', 'shadow-md', 'text-left', 'hover:bg-indigo-200', 'transition-colors', 'w-full');
                         button.dataset.songId = song.id;
                         button.dataset.songName = song.name;
-                        button.innerHTML = `<span class="font-semibold text-gray-800">${song.name}</span>`;
+                        button.innerHTML = `
+                            <div class="flex justify-between items-center w-full">
+                                <span class="font-semibold text-gray-800">${song.name}</span>
+                                <span class="font-bold text-purple-600 text-lg">${average}</span>
+                            </div>
+                        `;
                         songsListClickable.appendChild(button);
                     });
                 }
