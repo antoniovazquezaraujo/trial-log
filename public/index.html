@@ -188,6 +188,20 @@
             </form>
         </div>
     </div>
+    
+    <div id="edit-song-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Editar Tema</h2>
+            <form id="edit-song-form">
+                <input type="hidden" id="edit-song-id">
+                <input type="text" id="edit-song-name" placeholder="Nombre del tema" required class="w-full p-2 rounded-xl border border-gray-300 mb-4">
+                <input type="url" id="edit-song-video-url" placeholder="URL del video (YouTube, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
+                <input type="url" id="edit-song-score-url" placeholder="URL de la partitura (PDF, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-indigo-700">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
 
     <div id="invite-member-modal" class="modal">
         <div class="modal-content">
@@ -206,3 +220,7 @@
 
 
     <script type="module" src="script.js"></script>
+    <div class="w-full text-center text-gray-500 text-sm mt-8 mb-4">
+        (C) 2025 Antonio Vázquez Araújo
+    </div>
+</body>

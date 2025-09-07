@@ -72,11 +72,18 @@
             const addGroupModal = document.getElementById('add-group-modal');
             const addSongModal = document.getElementById('add-song-modal');
             const inviteMemberModal = document.getElementById('invite-member-modal');
+            const editSongModal = document.getElementById('edit-song-modal');
 
             const addGroupForm = document.getElementById('add-group-form');
             const newGroupNameInput = document.getElementById('new-group-name');
             
             const addSongForm = document.getElementById('add-song-form');
+
+            const editSongForm = document.getElementById('edit-song-form');
+            const editSongIdInput = document.getElementById('edit-song-id');
+            const editSongNameInput = document.getElementById('edit-song-name');
+            const editSongVideoUrlInput = document.getElementById('edit-song-video-url');
+            const editSongScoreUrlInput = document.getElementById('edit-song-score-url');
 
             const inviteMemberForm = document.getElementById('invite-member-form');
 
@@ -357,23 +364,52 @@
                     songsList.innerHTML = '<p class="text-gray-500">No hay temas. Añade uno nuevo.</p>';
                     return;
                 }
-                allSongs.forEach(song => {
+
+                const songsWithAverage = allSongs.map(song => {
                     const allRatingsForSong = allRehearsals
                         .flatMap(rehearsal => rehearsal.songs || [])
                         .filter(rehearsalSong => rehearsalSong.name === song.name)
                         .flatMap(rehearsalSong => rehearsalSong.ratings || []);
-
                     const average = calculateAverage(allRatingsForSong);
+                    return { ...song, average: average === 'N/A' ? -1 : parseFloat(average) }; // Use -1 for N/A to sort them first
+                });
 
+                songsWithAverage.sort((a, b) => {
+                    if (a.average === -1 && b.average !== -1) return -1; // N/A comes first
+                    if (a.average !== -1 && b.average === -1) return 1;  // N/A comes first
+                    return a.average - b.average; // Sort by average ascending
+                });
+
+                songsWithAverage.forEach(song => {
+                    const avgDisplay = song.average === -1 ? 'N/A' : song.average.toFixed(2);
                     const songEl = document.createElement('div');
                     songEl.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-indigo-100';
                     songEl.innerHTML = `
                         <span class="font-semibold">${song.name}</span>
-                        <span class="font-bold text-purple-600 text-lg">${average}</span>
+                        <span class="font-bold text-purple-600 text-lg">${avgDisplay}</span>
+                        <button class="edit-song-btn bg-blue-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-blue-600" data-id="${song.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
                     `;
-                    songEl.addEventListener('click', () => showSongHistoryView(song));
+                    songEl.addEventListener('click', (e) => {
+                        // Only show history if edit button was not clicked
+                        if (!e.target.closest('.edit-song-btn')) {
+                            showSongHistoryView(song);
+                        }
+                    });
                     songsList.appendChild(songEl);
                 });
+            }
+
+            function showEditSongModal(songId) {
+                const songToEdit = allSongs.find(song => song.id === songId);
+                if (songToEdit) {
+                    editSongIdInput.value = songToEdit.id;
+                    editSongNameInput.value = songToEdit.name;
+                    editSongVideoUrlInput.value = songToEdit.videoUrl || '';
+                    editSongScoreUrlInput.value = songToEdit.scoreUrl || '';
+                    editSongModal.style.display = 'flex';
+                }
             }
 
             function loadSongs() {
@@ -533,6 +569,7 @@
             setupModal(addGroupModal, addGroupBtn);
             setupModal(addSongModal, addSongBtn);
             setupModal(inviteMemberModal, addMemberBtn);
+            setupModal(editSongModal);
 
             // Form submissions
             addGroupForm.addEventListener('submit', async (e) => {
@@ -566,6 +603,29 @@
                     });
                     addSongForm.reset();
                     addSongModal.style.display = 'none';
+                }
+            });
+
+            editSongForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const songId = editSongIdInput.value;
+                const songName = editSongNameInput.value.trim();
+                const videoUrl = editSongVideoUrlInput.value.trim();
+                const scoreUrl = editSongScoreUrlInput.value.trim();
+
+                if (songId && songName && selectedGroupId) {
+                    try {
+                        await updateDoc(doc(db, `groups/${selectedGroupId}/songs`, songId), {
+                            name: songName,
+                            videoUrl: videoUrl,
+                            scoreUrl: scoreUrl
+                        });
+                        alert('Tema actualizado con éxito!');
+                        editSongModal.style.display = 'none';
+                    } catch (error) {
+                        console.error("Error actualizando el tema:", error);
+                        alert(`Error al actualizar el tema: ${error.message}`);
+                    }
                 }
             });
 
@@ -670,6 +730,14 @@
                             allCheckboxes[i].checked = false;
                         }
                     }
+                }
+            });
+
+            songsList.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.edit-song-btn');
+                if (editBtn) {
+                    const songId = editBtn.dataset.id;
+                    showEditSongModal(songId);
                 }
             });
 
