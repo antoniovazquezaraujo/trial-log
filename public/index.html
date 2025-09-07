@@ -246,7 +246,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, query, where, getDoc, setDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, query, where, getDoc, setDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
         let db, auth, functions, userId, selectedGroupId;
@@ -303,7 +303,6 @@
             const songTimerEl = document.getElementById('song-timer');
             const progressFillEl = document.getElementById('progress-fill');
             const totalTimeDisplayEl = document.getElementById('total-time-display');
-            const ratingButtons = document.getElementById('rating-buttons-container');
             const currentSongRatingsListEl = document.getElementById('current-song-ratings-list');
             const currentSongAverageRatingEl = document.getElementById('current-song-average-rating');
             const nextSongBtn = document.getElementById('next-song-btn');
@@ -562,10 +561,13 @@
                         groupEl.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-lg';
                         groupEl.innerHTML = `
                             <span class="font-semibold cursor-pointer hover:text-indigo-600">${group.name}</span>
-                            <button data-group-id="${group.id}" class="manage-group-btn bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600">Gestionar</button>
+                            <button data-group-id="${group.id}" data-group-name="${group.name}" class="manage-group-btn bg-blue-500 text-white font-bold py-1 px-3 rounded-lg text-sm hover:bg-blue-600">Gestionar</button>
                         `;
                         groupEl.querySelector('span').addEventListener('click', () => selectGroup(group.id));
-                        groupEl.querySelector('.manage-group-btn').addEventListener('click', () => openManageGroupModal(group));
+                        groupEl.querySelector('.manage-group-btn').addEventListener('click', (e) => {
+                            const groupData = userGroups.find(g => g.id === e.target.dataset.groupId);
+                            openManageGroupModal(groupData);
+                        });
                         groupsList.appendChild(groupEl);
                     });
                 });
@@ -632,11 +634,24 @@
                         rehearsalsList.innerHTML = '<p class="text-gray-500">No hay ensayos. Crea uno nuevo.</p>';
                         return;
                     }
-                    snapshot.forEach(doc => {
+                    snapshot.docs.sort((a, b) => {
+                        const timeA = a.data().createdAt ? a.data().createdAt.toMillis() : 0;
+                        const timeB = b.data().createdAt ? b.data().createdAt.toMillis() : 0;
+                        return timeB - timeA;
+                    }).forEach(doc => {
                         const rehearsal = { id: doc.id, ...doc.data() };
+                        const songNames = (rehearsal.songs || []).map(s => s.name).join(', ');
                         const rehearsalEl = document.createElement('div');
                         rehearsalEl.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-lg';
-                        rehearsalEl.innerHTML = `<span class="font-semibold">Ensayo del ${rehearsal.date}</span>`;
+                        rehearsalEl.innerHTML = `
+                        <div>
+                            <span class="font-semibold">Ensayo del ${rehearsal.date}</span>
+                            <div class="text-sm text-gray-600">${songNames}</div>
+                        </div>
+                        <button data-id="${rehearsal.id}" class="delete-rehearsal-btn bg-red-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                        `;
                         rehearsalsList.appendChild(rehearsalEl);
                     });
                 });
@@ -644,7 +659,7 @@
 
             function formatTime(seconds) {
                 const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
+                const remainingSeconds = Math.round(seconds % 60);
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             }
 
@@ -661,7 +676,6 @@
                     
                     if (rehearsalSession.songTimeRemaining <= 0) {
                         clearInterval(rehearsalSession.timerInterval);
-                        // Maybe show a message that time is up
                     }
                 }, 1000);
             }
@@ -729,8 +743,8 @@
                     date: rehearsalSession.date,
                     duration: rehearsalSession.duration,
                     songs: rehearsalSession.songs,
-                    completedAt: new Date(),
-                    userId: userId
+                    createdAt: new Date(),
+                    createdBy: userId
                 };
 
                 try {
@@ -738,7 +752,7 @@
                     alert("¡Ensayo guardado con éxito!");
                 } catch (error) {
                     console.error("Error guardando el ensayo:", error);
-                    alert("Error al guardar el ensayo.");
+                    alert(`Error al guardar el ensayo: ${error.message}`);
                 }
                 rehearsalSession.isActive = false;
                 showMainView();
@@ -838,21 +852,25 @@
                 }
             });
 
-            membersList.addEventListener('click', async (e) => {
-                if (e.target.classList.contains('remove-member-btn')) {
-                    const memberUid = e.target.dataset.uid;
-                    const groupId = manageGroupModal.dataset.groupId;
-                    if (confirm('¿Estás seguro de que quieres eliminar a este miembro?')) {
-                        const groupRef = doc(db, 'groups', groupId);
-                        await updateDoc(groupRef, { [`members.${memberUid}`]: deleteField() });
+            rehearsalsList.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-rehearsal-btn');
+                if (deleteBtn) {
+                    const rehearsalId = deleteBtn.dataset.id;
+                    if (confirm('¿Estás seguro de que quieres eliminar este ensayo?')) {
+                        try {
+                            await deleteDoc(doc(db, `groups/${selectedGroupId}/rehearsals`, rehearsalId));
+                        } catch (error) {
+                            console.error("Error eliminando el ensayo:", error);
+                            alert(`Error al eliminar el ensayo: ${error.message}`);
+                        }
                     }
                 }
             });
 
-            ratingButtons.addEventListener('click', (e) => {
-                alert("Rating button clicked!"); // DEBUGGING ALERT
-                if (e.target.classList.contains('rating-btn')) {
-                    const rating = parseInt(e.target.dataset.rating, 10);
+            rehearsalView.addEventListener('click', (e) => {
+                const ratingBtn = e.target.closest('.rating-btn');
+                if (ratingBtn) {
+                    const rating = parseInt(ratingBtn.dataset.rating, 10);
                     const currentSong = rehearsalSession.songs[rehearsalSession.currentSongIndex];
                     if (currentSong) {
                         if (!currentSong.ratings) {
