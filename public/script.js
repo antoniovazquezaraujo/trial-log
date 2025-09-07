@@ -386,10 +386,12 @@
                     songEl.className = 'flex items-center justify-between p-3 bg-gray-100 rounded-lg cursor-pointer hover:bg-indigo-100';
                     songEl.innerHTML = `
                         <span class="font-semibold">${song.name}</span>
-                        <span class="font-bold text-purple-600 text-lg">${avgDisplay}</span>
-                        <button class="edit-song-btn bg-blue-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-blue-600" data-id="${song.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        </button>
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-purple-600 text-lg w-16 text-right">${avgDisplay}</span>
+                            <button class="edit-song-btn bg-blue-500 text-white p-1.5 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-blue-600" data-id="${song.id}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                        </div>
                     `;
                     songEl.addEventListener('click', (e) => {
                         // Only show history if edit button was not clicked
