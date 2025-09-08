@@ -185,7 +185,11 @@
                     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 if (relevantRehearsals.length === 0) {
-                    songHistoryList.innerHTML = '<p class="text-gray-500">No hay historial para este tema.</p>';
+                    const row = songHistoryList.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 3;
+                    cell.textContent = 'No hay historial para este tema.';
+                    cell.className = 'text-center text-gray-500 py-4';
                     if (songChart) songChart.destroy();
                     return;
                 }
@@ -197,14 +201,20 @@
                     const songInRehearsal = rehearsal.songs.find(s => s.name === song.name);
                     if (songInRehearsal) {
                         const average = calculateAverage(songInRehearsal.ratings || []);
-                        const historyEl = document.createElement('div');
-                        historyEl.className = 'p-3 bg-gray-100 rounded-lg';
-                        historyEl.innerHTML = `
-                            <p><strong>Fecha:</strong> ${rehearsal.date}</p>
-                            <p><strong>Calificaciones:</strong> ${(songInRehearsal.ratings || []).join(', ')}</p>
-                            <p><strong>Promedio:</strong> ${average}</p>
-                        `;
-                        songHistoryList.appendChild(historyEl);
+                        const row = songHistoryList.insertRow();
+                        row.className = 'border-b';
+                        
+                        const dateCell = row.insertCell();
+                        dateCell.textContent = rehearsal.date;
+                        dateCell.className = 'px-4 py-2';
+
+                        const ratingsCell = row.insertCell();
+                        ratingsCell.textContent = (songInRehearsal.ratings || []).join(', ');
+                        ratingsCell.className = 'px-4 py-2';
+
+                        const averageCell = row.insertCell();
+                        averageCell.textContent = average;
+                        averageCell.className = 'px-4 py-2 font-bold';
 
                         if (average !== 'N/A') {
                             chartLabels.push(rehearsal.date);
@@ -567,10 +577,9 @@
 
                 try {
                     await addDoc(collection(db, `groups/${selectedGroupId}/rehearsals`), rehearsalData);
-                    alert("¡Ensayo guardado con éxito!");
                 } catch (error) {
                     console.error("Error guardando el ensayo:", error);
-                    alert(`Error al guardar el ensayo: ${error.message}`);
+                    
                 }
                 rehearsalSession.isActive = false;
                 showMainView();
@@ -640,11 +649,11 @@
                             videoUrl: videoUrl,
                             scoreUrl: scoreUrl
                         });
-                        alert('Tema actualizado con éxito!');
+                        
                         editSongModal.style.display = 'none';
                     } catch (error) {
                         console.error("Error actualizando el tema:", error);
-                        alert(`Error al actualizar el tema: ${error.message}`);
+                        
                     }
                 }
             });
@@ -657,7 +666,7 @@
                                          .map(checkbox => JSON.parse(checkbox.value));
 
                 if (!date || !duration || selectedSongs.length === 0) {
-                    alert('Por favor, completa todos los campos y selecciona al menos un tema.');
+                    
                     return;
                 }
 
@@ -685,12 +694,12 @@
                     const inviteUser = httpsCallable(functions, 'inviteUserToGroup');
                     try {
                         const result = await inviteUser({ email, groupId, role });
-                        alert(result.data.message);
+                        
                         document.getElementById('new-member-email').value = '';
                         inviteMemberModal.style.display = 'none';
                     } catch (error) {
                         console.error("Error al invitar usuario:", error);
-                        alert(`Error: ${error.message}`);
+                        
                     }
                 }
             });
@@ -778,23 +787,23 @@
 
             deleteGroupBtn.addEventListener('click', async () => {
                 if (!selectedGroupId) {
-                    alert('Por favor, selecciona un grupo para eliminar.');
+                    
                     return;
                 }
 
                 const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
                 if (selectedGroup.owner !== userId) {
-                    alert('No tienes permiso para eliminar este grupo.');
+                    
                     return;
                 }
 
                 if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup.name}"? Esta acción no se puede deshacer y borrará el grupo, pero no los temas y ensayos dentro de él.`)) {
                     try {
                         await deleteDoc(doc(db, "groups", selectedGroupId));
-                        alert('Grupo eliminado con éxito.');
+                        
                     } catch (error) {
                         console.error("Error eliminando el grupo:", error);
-                        alert(`Error al eliminar el grupo: ${error.message}`);
+                        
                     }
                 }
             });
