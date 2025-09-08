@@ -62,7 +62,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Miembros</h2>
                     <button id="add-member-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
                 </div>
-                <div id="members-list-view" class="space-y-2">
+                <div id="members-list-view" class="hidden space-y-2">
                     <!-- La lista de miembros se mostrará aquí -->
                 </div>
             </div>
@@ -73,7 +73,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Temas</h2>
                     <button id="add-song-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
                 </div>
-                <div id="songs-list" class="space-y-2">
+                <div id="songs-list" class="hidden space-y-2">
                     <!-- Los temas se listarán aquí dinámicamente -->
                 </div>
             </div>
@@ -84,7 +84,7 @@
                     <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Ensayos</h2>
                     <button id="add-rehearsal-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
                 </div>
-                <div id="rehearsals-list" class="space-y-2">
+                <div id="rehearsals-list" class="hidden space-y-2">
                     <!-- Los ensayos se listarán aquí dinámicamente -->
                 </div>
             </div>
@@ -104,9 +104,17 @@
             <div id="song-history-chart-container" class="p-4 bg-white rounded-xl shadow-inner my-6 h-80">
                 <canvas id="song-history-chart"></canvas>
             </div>
-            <div id="song-history-list" class="space-y-2">
-                <!-- Las entradas del historial se listarán aquí -->
-            </div>
+            <table id="song-history-table" class="w-full text-left table-fixed text-sm">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
+                        <th class="px-4 py-2 w-1/3">Calificaciones</th>
+                        <th class="px-4 py-2">Promedio</th>
+                    </tr>
+                </thead>
+                <tbody id="song-history-list">
+                </tbody>
+            </table>
         </div>
 
         <!-- Vista de Crear Ensayo -->
