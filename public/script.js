@@ -20,13 +20,15 @@
             const mainContainer = document.getElementById('main-container');
             const loginBtn = document.getElementById('login-btn');
             const logoutBtn = document.getElementById('logout-btn');
-            const userNameEl = document.getElementById('user-name');
-            const userEmailEl = document.getElementById('user-email');
 
             const mainView = document.getElementById('main-view');
             const groupsSection = document.getElementById('groups-section');
             const addGroupBtn = document.getElementById('add-group-btn');
             const groupSelector = document.getElementById('group-selector');
+            const deleteGroupBtn = document.getElementById('delete-group-btn');
+            const groupHeader = document.getElementById('group-header');
+            const groupSelectionContainer = document.getElementById('group-selection-container');
+            const groupTitle = groupHeader.querySelector('h2');
             
             const membersSection = document.getElementById('members-section');
             const addMemberBtn = document.getElementById('add-member-btn');
@@ -293,13 +295,15 @@
                     userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     groupSelector.innerHTML = '';
                     if (userGroups.length === 0) {
-                        groupSelector.innerHTML = '<option>Crea un grupo para empezar</option>';
+                        groupTitle.textContent = 'Crea un grupo para empezar';
                         membersSection.classList.add('hidden');
                         songsSection.classList.add('hidden');
                         rehearsalsSection.classList.add('hidden');
                         selectedGroupId = null;
+                        deleteGroupBtn.disabled = true;
                         return;
                     }
+                    deleteGroupBtn.disabled = false;
                     userGroups.forEach(group => {
                         const option = document.createElement('option');
                         option.value = group.id;
@@ -312,6 +316,8 @@
                     // If no group was selected, or selected group was deleted, select the first one
                     if (!selectedGroupId || !userGroups.some(g => g.id === selectedGroupId)) {
                         selectGroup(userGroups[0].id);
+                    } else {
+                        selectGroup(selectedGroupId);
                     }
                 });
             }
@@ -319,6 +325,12 @@
             function selectGroup(groupId) {
                 selectedGroupId = groupId;
                 groupSelector.value = groupId;
+
+                const selectedGroup = userGroups.find(g => g.id === groupId);
+                if (selectedGroup) {
+                    groupTitle.textContent = selectedGroup.name;
+                    deleteGroupBtn.disabled = selectedGroup.owner !== userId;
+                }
 
                 membersSection.classList.remove('hidden');
                 songsSection.classList.remove('hidden');
@@ -764,15 +776,41 @@
             addMemberBtn.addEventListener('click', () => inviteMemberModal.style.display = 'flex');
             groupSelector.addEventListener('change', (e) => selectGroup(e.target.value));
 
+            deleteGroupBtn.addEventListener('click', async () => {
+                if (!selectedGroupId) {
+                    alert('Por favor, selecciona un grupo para eliminar.');
+                    return;
+                }
+
+                const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
+                if (selectedGroup.owner !== userId) {
+                    alert('No tienes permiso para eliminar este grupo.');
+                    return;
+                }
+
+                if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup.name}"? Esta acción no se puede deshacer y borrará el grupo, pero no los temas y ensayos dentro de él.`)) {
+                    try {
+                        await deleteDoc(doc(db, "groups", selectedGroupId));
+                        alert('Grupo eliminado con éxito.');
+                    } catch (error) {
+                        console.error("Error eliminando el grupo:", error);
+                        alert(`Error al eliminar el grupo: ${error.message}`);
+                    }
+                }
+            });
+
             document.querySelectorAll('.section-toggle-title').forEach(title => {
                 title.addEventListener('click', (e) => {
-                    let content = e.target.nextElementSibling;
-                    if (e.target.parentElement.id === 'groups-section') {
+                    const clickedElement = e.currentTarget;
+                    let content;
+
+                    if (clickedElement.id === 'group-header') {
                         content = document.getElementById('group-selection-container');
                     } else {
-                        content = e.target.parentElement.parentElement.querySelector('div:last-child');
+                        content = clickedElement.parentElement.nextElementSibling;
                     }
-                    if(content) {
+
+                    if (content) {
                         content.classList.toggle('hidden');
                     }
                 });
