@@ -101,6 +101,8 @@
                         connectFunctionsEmulator(functions, "localhost", 5001);
                     }
 
+                    loginBtn.disabled = false;
+
                     onAuthStateChanged(auth, user => {
                         if (user) {
                             userId = user.uid;
@@ -144,6 +146,7 @@
                 songHistoryView.classList.add('hidden');
                 createRehearsalView.classList.add('hidden');
                 rehearsalView.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
             }
 
             function showSongHistoryView(song) {
@@ -151,6 +154,7 @@
                 createRehearsalView.classList.add('hidden');
                 rehearsalView.classList.add('hidden');
                 songHistoryView.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
 
                 historySongName.textContent = song.name;
                 songHistoryList.innerHTML = '';
@@ -240,6 +244,7 @@
                 songHistoryView.classList.add('hidden');
                 rehearsalView.classList.add('hidden');
                 createRehearsalView.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
 
                 rehearsalDateInput.valueAsDate = new Date();
                 rehearsalSongsList.innerHTML = '';
@@ -277,6 +282,7 @@
                 songHistoryView.classList.add('hidden');
                 createRehearsalView.classList.add('hidden');
                 rehearsalView.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
                 startSongTimer();
             }
 
