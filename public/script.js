@@ -300,7 +300,7 @@
 
             function loadGroups() {
                 if(unsubscribeGroups) unsubscribeGroups();
-                const q = query(collection(db, "groups"), where(`members.${userId}`, 'in', ['admin', 'reader', 'creator']));
+                const q = query(collection(db, "groups"), where('memberIds', 'array-contains', userId));
                 unsubscribeGroups = onSnapshot(q, snapshot => {
                     userGroups = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     groupSelector.innerHTML = '';
@@ -609,7 +609,8 @@
                         name: groupName,
                         owner: userId,
                         createdAt: new Date(),
-                        members: { [userId]: 'admin' }
+                        members: { [userId]: 'admin' },
+                        memberIds: [userId]
                     });
                     newGroupNameInput.value = '';
                     addGroupModal.style.display = 'none';
@@ -725,7 +726,10 @@
                     const memberUid = removeBtn.dataset.uid;
                     if (confirm('¿Estás seguro de que quieres eliminar a este miembro?')) {
                         const groupRef = doc(db, 'groups', selectedGroupId);
-                        await updateDoc(groupRef, { [`members.${memberUid}`]: deleteField() });
+                        await updateDoc(groupRef, { 
+                            [`members.${memberUid}`]: deleteField(),
+                            memberIds: arrayRemove(memberUid)
+                        });
                     }
                 }
             });

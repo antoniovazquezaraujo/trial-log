@@ -64,6 +64,7 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
 
       await groupRef.update({
         [`members.${invitedUid}`]: role || "reader",
+        memberIds: admin.firestore.FieldValue.arrayUnion(invitedUid)
       });
 
       res.status(200).json({ data: { message: `Success! ${email} has been invited to the group.` } });

@@ -1,18 +1,8 @@
 {
   "projects": {
-    "default": "gig-log-14233"
+    "default": "the-trial-log"
   },
   "targets": {
-    "gig-log-14233": {
-      "hosting": {
-        "dev": [
-          "gig-log-dev"
-        ],
-        "live": [
-          "gig-log-14233"
-        ]
-      }
-    },
     "trial-log": {
       "hosting": {
         "live": [
