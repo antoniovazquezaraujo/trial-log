@@ -1,10 +1,10 @@
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, query, where, getDoc, setDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, RecaptchaVerifier, signInWithPhoneNumber, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, query, where, getDoc, setDoc, updateDoc, deleteField, deleteDoc, arrayRemove, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getFunctions, httpsCallable, connectFunctionsEmulator } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
 
-        let db, auth, functions, userId, selectedGroupId;
+        let db, auth, functions, userId, selectedGroupId, confirmationResult, recaptchaVerifier;
         let userGroups = [];
         let allSongs = [];
         let allRehearsals = [];
@@ -20,6 +20,15 @@
             const mainContainer = document.getElementById('main-container');
             const loginBtn = document.getElementById('login-btn');
             const logoutBtn = document.getElementById('logout-btn');
+            const phoneLoginBtn = document.getElementById('phone-login-btn');
+
+            // Phone Login View
+            const phoneLoginView = document.getElementById('phone-login-view');
+            const phoneNumberInput = document.getElementById('phone-number-input');
+            const sendCodeBtn = document.getElementById('send-code-btn');
+            const verificationCodeInput = document.getElementById('verification-code-input');
+            const verifyCodeBtn = document.getElementById('verify-code-btn');
+            const backToLoginBtn = document.getElementById('back-to-login-btn');
 
             const mainView = document.getElementById('main-view');
             const groupsSection = document.getElementById('groups-section');
@@ -98,7 +107,7 @@
                     functions = getFunctions(app);
 
                     if (window.location.hostname === "localhost") {
-                        connectAuthEmulator(auth, "http://localhost:9099");
+                        connectAuthEmulator(auth, "http://localhost:9099", { disableAppCheck: true });
                         connectFirestoreEmulator(db, "localhost", 8080);
                         connectFunctionsEmulator(functions, "localhost", 5001);
                     }
@@ -109,6 +118,7 @@
                         if (user) {
                             userId = user.uid;
                             loginView.classList.add('hidden');
+                            phoneLoginView.classList.add('hidden');
                             mainContainer.classList.remove('hidden');
                             saveUserToFirestore(user);
                             loadGroups();
@@ -118,6 +128,11 @@
                             selectedGroupId = null;
                             loginView.classList.remove('hidden');
                             mainContainer.classList.add('hidden');
+                            phoneLoginView.classList.add('hidden');
+                            if(recaptchaVerifier) {
+                                recaptchaVerifier.clear();
+                                recaptchaVerifier = null;
+                            }
                             if(unsubscribeGroups) unsubscribeGroups();
                             if(unsubscribeSongs) unsubscribeSongs();
                             if(unsubscribeRehearsals) unsubscribeRehearsals();
@@ -127,13 +142,42 @@
                 });
             }
 
+            function setupRecaptcha() {
+                console.log("Attempting to set up reCAPTCHA...");
+                if (recaptchaVerifier) {
+                    recaptchaVerifier.clear();
+                }
+                sendCodeBtn.disabled = true;
+                recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'normal',
+                    'callback': (response) => {
+                        console.log("reCAPTCHA solved, enabling send button.");
+                        sendCodeBtn.disabled = false;
+                    },
+                    'expired-callback': () => {
+                        console.log("reCAPTCHA expired, disabling send button.");
+                        sendCodeBtn.disabled = true;
+                    }
+                });
+                
+                const container = document.getElementById('recaptcha-container');
+                console.log("reCAPTCHA container element:", container);
+
+                recaptchaVerifier.render().then((widgetId) => {
+                    console.log("reCAPTCHA rendered with widgetId:", widgetId);
+                }).catch((error) => {
+                    console.error("reCAPTCHA render error:", error);
+                });
+            }
+
             async function saveUserToFirestore(user) {
                 const userRef = doc(db, "users", user.uid);
                 const userDoc = await getDoc(userRef);
                 if (!userDoc.exists()) {
                     await setDoc(userRef, {
-                        name: user.displayName,
+                        name: user.displayName || user.phoneNumber,
                         email: user.email,
+                        phone: user.phoneNumber,
                         createdAt: new Date()
                     });
                 }
@@ -369,7 +413,7 @@
                             memberEl.className = 'flex items-center justify-between p-2 bg-gray-100 rounded-lg';
                             memberEl.innerHTML = `
                                 <div>
-                                    <p class="font-semibold">${member.name || member.email}</p>
+                                    <p class="font-semibold">${member.name || member.email || member.phone}</p>
                                     <p class="text-sm text-gray-500">${group.members[member.uid]}</p>
                                 </div>
                                 ${group.owner !== member.uid ? `<button data-uid="${member.uid}" class="remove-member-btn bg-red-500 text-white px-2 py-1 rounded text-sm">Eliminar</button>` : '<span class="text-sm text-gray-500">(Propietario)</span>'}
@@ -688,15 +732,15 @@
 
             inviteMemberForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('new-member-email').value.trim();
+                const identifier = document.getElementById('new-member-identifier').value.trim();
                 const role = document.getElementById('new-member-role').value;
                 const groupId = selectedGroupId;
-                if (email && role && groupId) {
+                if (identifier && role && groupId) {
                     const inviteUser = httpsCallable(functions, 'inviteUserToGroup');
                     try {
-                        const result = await inviteUser({ email, groupId, role });
+                        const result = await inviteUser({ identifier, groupId, role });
                         
-                        document.getElementById('new-member-email').value = '';
+                        document.getElementById('new-member-identifier').value = '';
                         inviteMemberModal.style.display = 'none';
                     } catch (error) {
                         console.error("Error al invitar usuario:", error);
@@ -779,6 +823,55 @@
                 const provider = new GoogleAuthProvider();
                 signInWithPopup(auth, provider).catch(error => console.error("Login failed:", error));
             });
+
+            phoneLoginBtn.addEventListener('click', () => {
+                console.log("Phone login button clicked.");
+                loginView.classList.add('hidden');
+                phoneLoginView.classList.remove('hidden');
+                setTimeout(() => {
+                    setupRecaptcha();
+                }, 100);
+            });
+
+            backToLoginBtn.addEventListener('click', () => {
+                loginView.classList.remove('hidden');
+                phoneLoginView.classList.add('hidden');
+            });
+
+            sendCodeBtn.addEventListener('click', () => {
+                const phoneNumber = phoneNumberInput.value;
+                console.log("Attempting to send code to:", phoneNumber);
+
+                if (!/^\+[1-9]\d{1,14}$/.test(phoneNumber)) {
+                    console.error("Invalid phone number format. It must be in E.164 format (e.g., +34123456789).");
+                    alert("Formato de número de teléfono no válido. Debe empezar con + seguido del código de país (ej: +34...)." );
+                    return;
+                }
+
+                signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
+                    .then((result) => {
+                        console.log("Code sent successfully. Confirmation result:", result);
+                        confirmationResult = result;
+                        sendCodeBtn.classList.add('hidden');
+                        phoneNumberInput.classList.add('hidden');
+                        document.getElementById('recaptcha-container').classList.add('hidden');
+                        verificationCodeInput.classList.remove('hidden');
+                        verifyCodeBtn.classList.remove('hidden');
+                    }).catch((error) => {
+                        console.error("Error sending SMS:", error);
+                        alert(`Error al enviar el código: ${error.message}`);
+                    });
+            });
+
+            verifyCodeBtn.addEventListener('click', () => {
+                const code = verificationCodeInput.value;
+                if (confirmationResult) {
+                    confirmationResult.confirm(code).catch((error) => {
+                        console.error("Code not verified", error);
+                    });
+                }
+            });
+
 
             logoutBtn.addEventListener('click', () => signOut(auth));
             backToMainBtn.addEventListener('click', showMainView);
