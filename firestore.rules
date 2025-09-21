@@ -7,9 +7,7 @@ service cloud.firestore {
     }
 
     match /groups/{groupId} {
-      function isMember() {
-        return get(/databases/$(database)/documents/groups/$(groupId)).data.members[request.auth.uid] != null;
-      }
+      // Helper functions now check the 'members' map for roles, which is fine for single-doc operations
       function isCreator() {
         return get(/databases/$(database)/documents/groups/$(groupId)).data.members[request.auth.uid] in ['admin', 'creator'];
       }
@@ -17,19 +15,24 @@ service cloud.firestore {
         return get(/databases/$(database)/documents/groups/$(groupId)).data.members[request.auth.uid] == 'admin';
       }
 
-      allow read: if isMember();
+      // Read rules now check the 'memberIds' array, allowing for secure queries and gets.
+      allow read: if request.auth.uid in resource.data.memberIds;
+      
       allow create: if request.auth != null;
       allow update: if isAdmin();
       allow delete: if get(/databases/$(database)/documents/groups/$(groupId)).data.owner == request.auth.uid;
 
       match /songs/{songId} {
-        allow read: if isMember();
+        // To read a song, you must be a member of the parent group.
+        allow read: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
         allow write: if isCreator();
       }
 
       match /rehearsals/{rehearsalId} {
-        allow read: if isMember();
-        allow create: if isMember();
+        // To read a rehearsal, you must be a member of the parent group.
+        allow read: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+        // To create a rehearsal, you must be a member of the parent group.
+        allow create: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
         allow delete: if isAdmin() || resource.data.createdBy == request.auth.uid;
         allow update: if false;
       }

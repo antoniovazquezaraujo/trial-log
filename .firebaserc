@@ -1,25 +1,5 @@
 {
   "projects": {
-    "default": "gig-log-14233"
-  },
-  "targets": {
-    "gig-log-14233": {
-      "hosting": {
-        "dev": [
-          "gig-log-dev"
-        ],
-        "live": [
-          "gig-log-14233"
-        ]
-      }
-    },
-    "trial-log": {
-      "hosting": {
-        "live": [
-          "trial-log"
-        ]
-      }
-    }
-  },
-  "etags": {}
+    "default": "the-trial-log"
+  }
 }

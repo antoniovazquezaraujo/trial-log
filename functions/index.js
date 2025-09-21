@@ -18,63 +18,64 @@ exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
     }
 
     let idToken;
-    idToken = req.headers.authorization.split('Bearer ')[1];
-    
-    let decodedIdToken;
     try {
-        decodedIdToken = await admin.auth().verifyIdToken(idToken);
+        idToken = req.headers.authorization.split('Bearer ')[1];
+        const decodedIdToken = await admin.auth().verifyIdToken(idToken);
+        const callerUid = decodedIdToken.uid;
+        const { identifier, groupId, role } = req.body.data;
+
+        if (!identifier || !groupId) {
+            res.status(400).json({ error: { message: "The function must be called with 'identifier' and 'groupId' arguments." } });
+            return;
+        }
+
+        const db = admin.firestore();
+        const groupRef = db.collection("groups").doc(groupId);
+        const groupDoc = await groupRef.get();
+
+        if (!groupDoc.exists) {
+            res.status(404).json({ error: { message: "Group not found." } });
+            return;
+        }
+
+        const groupData = groupDoc.data();
+        if (groupData.members[callerUid] !== "admin") {
+            res.status(403).json({ error: { message: "You must be an admin to invite users." } });
+            return;
+        }
+
+        let userRecord;
+        try {
+            if (identifier.includes('@')) {
+                userRecord = await admin.auth().getUserByEmail(identifier);
+            } else {
+                userRecord = await admin.auth().getUserByPhoneNumber(identifier);
+            }
+        } catch (error) {
+            if (error.code === 'auth/user-not-found') {
+                res.status(404).json({ error: { message: `No user found with the identifier ${identifier}.` } });
+                return;
+            }
+            throw error; // Rethrow other errors
+        }
+        
+        const invitedUid = userRecord.uid;
+
+        if (groupData.members[invitedUid]) {
+            res.status(409).json({ error: { message: "This user is already a member of the group." } });
+            return;
+        }
+
+        await groupRef.update({
+            [`members.${invitedUid}`]: role || "reader",
+            memberIds: admin.firestore.FieldValue.arrayUnion(invitedUid)
+        });
+
+        res.status(200).json({ data: { message: `Success! ${identifier} has been invited to the group.` } });
+
     } catch (error) {
-        console.error('Error while verifying Firebase ID token:', error);
-        res.status(403).json({ error: { message: 'Unauthorized' } });
-        return;
-    }
-
-    const callerUid = decodedIdToken.uid;
-    const { email, groupId, role } = req.body.data;
-
-    if (!email || !groupId) {
-      res.status(400).json({ error: { message: "The function must be called with 'email' and 'groupId' arguments." } });
-      return;
-    }
-
-    const db = admin.firestore();
-
-    try {
-      const groupRef = db.collection("groups").doc(groupId);
-      const groupDoc = await groupRef.get();
-
-      if (!groupDoc.exists) {
-        res.status(404).json({ error: { message: "Group not found." } });
-        return;
-      }
-
-      const groupData = groupDoc.data();
-      if (groupData.members[callerUid] !== "admin") {
-        res.status(403).json({ error: { message: "You must be an admin to invite users." } });
-        return;
-      }
-
-      const userRecord = await admin.auth().getUserByEmail(email);
-      const invitedUid = userRecord.uid;
-
-      if (groupData.members[invitedUid]) {
-        res.status(409).json({ error: { message: "This user is already a member of the group." } });
-        return;
-      }
-
-      await groupRef.update({
-        [`members.${invitedUid}`]: role || "reader",
-      });
-
-      res.status(200).json({ data: { message: `Success! ${email} has been invited to the group.` } });
-
-    } catch (error) {
-      console.error("Error inviting user:", error);
-      if (error.code === 'auth/user-not-found') {
-          res.status(404).json({ error: { message: `No user found with the email ${email}.` } });
-          return;
-      }
-      res.status(500).json({ error: { message: "An unexpected error occurred." } });
+        console.error("Error inviting user:", error);
+        res.status(500).json({ error: { message: "An unexpected error occurred." } });
     }
   });
 });
