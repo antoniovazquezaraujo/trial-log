@@ -26,7 +26,7 @@ jobs:
       - name: Deploy to Firebase Preview Channel
         id: deploy_preview
         run: |
-          deploy_output=$(firebase --version 2>&1)
+          deploy_output=$(firebase hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project the-trial-log --json 2>&1)
           echo "deploy_output<<EOF" >> $GITHUB_OUTPUT
           echo "$deploy_output" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
