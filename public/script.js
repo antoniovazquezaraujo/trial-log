@@ -885,23 +885,23 @@
 
             deleteGroupBtn.addEventListener('click', async () => {
                 if (!selectedGroupId) {
-                    
                     return;
                 }
 
                 const selectedGroup = userGroups.find(g => g.id === selectedGroupId);
                 if (selectedGroup.owner !== userId) {
-                    
+                    alert('Only the group owner can delete the group.');
                     return;
                 }
 
-                if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup.name}"? Esta acción no se puede deshacer y borrará el grupo, pero no los temas y ensayos dentro de él.`)) {
+                if (confirm(`¿Estás seguro de que quieres eliminar el grupo "${selectedGroup.name}"? Esta acción borrará el grupo y todos sus datos (temas, ensayos).`)) {
+                    const deleteGroup = httpsCallable(functions, 'deleteGroup');
                     try {
-                        await deleteDoc(doc(db, "groups", selectedGroupId));
-                        
+                        await deleteGroup({ groupId: selectedGroupId });
+                        // The group will disappear from the UI automatically due to the onSnapshot listener
                     } catch (error) {
                         console.error("Error eliminando el grupo:", error);
-                        
+                        alert(`Error al eliminar el grupo: ${error.message}`);
                     }
                 }
             });
