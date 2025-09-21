@@ -23,6 +23,8 @@ jobs:
           project_id: 'the-trial-log'
       - name: Install Firebase CLI
         run: npm install -g firebase-tools@latest
+      - name: Add npm global bin to PATH
+        run: echo "PATH=$(npm bin -g):$PATH" >> $GITHUB_ENV
       - name: Deploy to Firebase Preview Channel
         id: deploy_preview
         run: |
