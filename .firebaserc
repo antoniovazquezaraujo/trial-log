@@ -1,15 +1,5 @@
 {
   "projects": {
     "default": "the-trial-log"
-  },
-  "targets": {
-    "trial-log": {
-      "hosting": {
-        "live": [
-          "trial-log"
-        ]
-      }
-    }
-  },
-  "etags": {}
+  }
 }

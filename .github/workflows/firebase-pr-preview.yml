@@ -23,7 +23,7 @@ jobs:
       - name: Deploy to Firebase Preview Channel
         id: deploy_preview
         run: |
-          deploy_output=$(npx firebase-tools hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project trial-log --json)
+          deploy_output=$(npx firebase-tools hosting:channel:deploy pr-${{ github.event.number }} --expires 7d --project the-trial-log --json)
           echo "deploy_output<<EOF" >> $GITHUB_OUTPUT
           echo "$deploy_output" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -32,7 +32,7 @@ jobs:
         with:
           script: |
             const output = JSON.parse(`${{ steps.deploy_preview.outputs.deploy_output }}`);
-            const previewUrl = output.result['trial-log'].url;
+            const previewUrl = output.result['the-trial-log'].url;
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
