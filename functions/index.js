@@ -1,141 +1,102 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const cors = require("cors")({ origin: true });
 
 admin.initializeApp();
 
-exports.inviteUserToGroup = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
-    if (req.method !== 'POST') {
-      res.status(405).send('Method Not Allowed');
-      return;
+exports.inviteUserToGroup = functions.https.onCall(async (data, context) => {
+  // Check authentication
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+  const callerUid = context.auth.uid;
+  const { identifier, groupId, role } = data;
+
+  if (!identifier || !groupId) {
+    throw new functions.https.HttpsError('invalid-argument', "The function must be called with 'identifier' and 'groupId' arguments.");
+  }
+
+  const db = admin.firestore();
+  const groupRef = db.collection("groups").doc(groupId);
+  const groupDoc = await groupRef.get();
+
+  if (!groupDoc.exists) {
+    throw new functions.https.HttpsError('not-found', 'Group not found.');
+  }
+
+  const groupData = groupDoc.data();
+  if (groupData.members[callerUid] !== "admin") {
+    throw new functions.https.HttpsError('permission-denied', 'You must be an admin to invite users.');
+  }
+
+  let userRecord;
+  try {
+    if (identifier.includes('@')) {
+      userRecord = await admin.auth().getUserByEmail(identifier);
+    } else {
+      userRecord = await admin.auth().getUserByPhoneNumber(identifier);
     }
-
-    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
-      console.error('No Firebase ID token was passed as a Bearer token in the Authorization header.');
-      res.status(403).json({ error: { message: 'Unauthorized' } });
-      return;
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      throw new functions.https.HttpsError('not-found', `No user found with the identifier ${identifier}.`);
     }
+    // Rethrow other admin SDK errors as internal errors
+    console.error(error);
+    throw new functions.https.HttpsError('internal', 'An unexpected error occurred looking up the user.');
+  }
+  
+  const invitedUid = userRecord.uid;
 
-    let idToken;
-    try {
-        idToken = req.headers.authorization.split('Bearer ')[1];
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-        const callerUid = decodedIdToken.uid;
-        const { identifier, groupId, role } = req.body.data;
+  if (groupData.members[invitedUid]) {
+    throw new functions.https.HttpsError('already-exists', 'This user is already a member of the group.');
+  }
 
-        if (!identifier || !groupId) {
-            res.status(400).json({ error: { message: "The function must be called with 'identifier' and 'groupId' arguments." } });
-            return;
-        }
-
-        const db = admin.firestore();
-        const groupRef = db.collection("groups").doc(groupId);
-        const groupDoc = await groupRef.get();
-
-        if (!groupDoc.exists) {
-            res.status(404).json({ error: { message: "Group not found." } });
-            return;
-        }
-
-        const groupData = groupDoc.data();
-        if (groupData.members[callerUid] !== "admin") {
-            res.status(403).json({ error: { message: "You must be an admin to invite users." } });
-            return;
-        }
-
-        let userRecord;
-        try {
-            if (identifier.includes('@')) {
-                userRecord = await admin.auth().getUserByEmail(identifier);
-            } else {
-                userRecord = await admin.auth().getUserByPhoneNumber(identifier);
-            }
-        } catch (error) {
-            if (error.code === 'auth/user-not-found') {
-                res.status(404).json({ error: { message: `No user found with the identifier ${identifier}.` } });
-                return;
-            }
-            throw error; // Rethrow other errors
-        }
-        
-        const invitedUid = userRecord.uid;
-
-        if (groupData.members[invitedUid]) {
-            res.status(409).json({ error: { message: "This user is already a member of the group." } });
-            return;
-        }
-
-        await groupRef.update({
-            [`members.${invitedUid}`]: role || "reader",
-            memberIds: admin.firestore.FieldValue.arrayUnion(invitedUid)
-        });
-
-        res.status(200).json({ data: { message: `Success! ${identifier} has been invited to the group.` } });
-
-    } catch (error) {
-        console.error("Error inviting user:", error);
-        res.status(500).json({ error: { message: "An unexpected error occurred." } });
-    }
+  await groupRef.update({
+    [`members.${invitedUid}`]: role || "reader",
+    memberIds: admin.firestore.FieldValue.arrayUnion(invitedUid)
   });
+
+  return { message: `Success! ${identifier} has been invited to the group.` };
 });
 
-exports.deleteGroup = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => {
-    if (req.method !== 'POST') {
-        res.status(405).send('Method Not Allowed');
-        return;
-    }
+exports.deleteGroup = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+  const uid = context.auth.uid;
+  const { groupId } = data;
 
-    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
-        res.status(403).json({ error: { message: 'Unauthorized' } });
-        return;
-    }
+  if (!groupId) {
+    throw new functions.https.HttpsError('invalid-argument', 'Group ID is required.');
+  }
 
-    let idToken;
-    try {
-        idToken = req.headers.authorization.split('Bearer ')[1];
-        const decodedIdToken = await admin.auth().verifyIdToken(idToken);
-        const uid = decodedIdToken.uid;
-        const { groupId } = req.body.data;
+  const db = admin.firestore();
+  const groupRef = db.collection('groups').doc(groupId);
+  const groupDoc = await groupRef.get();
 
-        if (!groupId) {
-            res.status(400).json({ error: { message: 'Group ID is required.' } });
-            return;
-        }
+  if (!groupDoc.exists) {
+    throw new functions.https.HttpsError('not-found', 'Group not found.');
+  }
 
-        const db = admin.firestore();
-        const groupRef = db.collection('groups').doc(groupId);
-        const groupDoc = await groupRef.get();
+  const groupData = groupDoc.data();
 
-        if (!groupDoc.exists) {
-            res.status(404).json({ error: { message: 'Group not found.' } });
-            return;
-        }
+  if (groupData.owner !== uid) {
+      throw new functions.https.HttpsError('permission-denied', 'You do not have permission to delete this group.');
+  }
 
-        const groupData = groupDoc.data();
+  if (Object.keys(groupData.members).length > 1) {
+    throw new functions.https.HttpsError('permission-denied', 'You can only delete groups if you are the only member. Please remove other members first.');
+  }
 
-        if (groupData.owner !== uid || Object.keys(groupData.members).length !== 1) {
-            res.status(403).json({ error: { message: 'You do not have permission to delete this group.' } });
-            return;
-        }
+  const songsRef = groupRef.collection('songs');
+  const songsSnapshot = await songsRef.get();
+  const songDeletions = songsSnapshot.docs.map(doc => doc.ref.delete());
 
-        const songsRef = groupRef.collection('songs');
-        const songsSnapshot = await songsRef.get();
-        const songDeletions = songsSnapshot.docs.map(doc => doc.ref.delete());
+  const rehearsalsRef = groupRef.collection('rehearsals');
+  const rehearsalsSnapshot = await rehearsalsRef.get();
+  const rehearsalDeletions = rehearsalsSnapshot.docs.map(doc => doc.ref.delete());
 
-        const rehearsalsRef = groupRef.collection('rehearsals');
-        const rehearsalsSnapshot = await rehearsalsRef.get();
-        const rehearsalDeletions = rehearsalsSnapshot.docs.map(doc => doc.ref.delete());
+  await Promise.all([...songDeletions, ...rehearsalDeletions]);
+  await groupRef.delete();
 
-        await Promise.all([...songDeletions, ...rehearsalDeletions]);
-        await groupRef.delete();
-
-        res.status(200).json({ data: { message: 'Group deleted successfully.' } });
-
-    } catch (error) {
-        console.error("Error deleting group:", error);
-        res.status(500).json({ error: { message: 'An unexpected error occurred.', details: error.message } });
-    }
-  });
+  return { message: 'Group deleted successfully.' };
 });
