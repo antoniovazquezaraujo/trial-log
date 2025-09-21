@@ -824,6 +824,7 @@
                 signInWithPopup(auth, provider).catch(error => console.error("Login failed:", error));
             });
 
+            console.log("Attaching event listener to phoneLoginBtn");
             phoneLoginBtn.addEventListener('click', () => {
                 console.log("Phone login button clicked.");
                 loginView.classList.add('hidden');
