@@ -16,31 +16,10 @@ jobs:
       - name: Install function dependencies
         run: npm ci
         working-directory: functions
-      - name: Authenticate to Google Cloud
-        uses: 'google-github-actions/auth@v2'
+      - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}'
-          project_id: 'the-trial-log'
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools@latest
-      - name: Add npm global bin to PATH
-        run: echo "PATH=$(npm bin -g):$PATH" >> $GITHUB_ENV
-      - name: Deploy to Firebase Preview Channel
-        id: deploy_preview
-        run: |
-          deploy_output=$(firebase --version 2>&1)
-          echo "deploy_output<<EOF" >> $GITHUB_OUTPUT
-          echo "$deploy_output" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      - name: Post Preview URL to PR
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = JSON.parse(`${{ steps.deploy_preview.outputs.deploy_output }}`);
-            const previewUrl = output.result['the-trial-log'].url;
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚀 **Preview URL:** ${previewUrl}`
-            });
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GIG_LOG_14233 }}
+          projectId: the-trial-log
+          # The action automatically creates a preview channel for PRs and comments on the PR.
+          # No need for manual channelId or PR commenting.
