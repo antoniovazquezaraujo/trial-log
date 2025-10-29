@@ -1,272 +1,697 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trial Log</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="bg-indigo-50 flex flex-col items-center min-h-screen p-4">
-
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="bg-indigo-50 flex flex-col items-center min-h-screen p-4">
     <!-- Vista de Login -->
     <div id="login-view" class="w-full max-w-sm mx-auto mt-20 text-center">
-        <img src="logo.png" alt="Logo" class="mx-auto h-24 w-auto mb-4">
-        <h1 class="text-4xl font-bold text-indigo-800 mb-6">Trial Log</h1>
-        <p class="text-gray-600 mb-8">Gestor de ensayos</p>
-        <div class="space-y-4">
-            <button id="login-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md flex items-center justify-center mx-auto disabled:opacity-50 disabled:cursor-not-allowed">
-                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48px" height="48px"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,35.688,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
-                Iniciar sesión con Google
-            </button>
-            <button id="phone-login-btn" class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105 hover:bg-green-600 shadow-md flex items-center justify-center mx-auto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                Iniciar sesión con móvil
-            </button>
-        </div>
+      <img src="logo.png" alt="Logo" class="mx-auto h-24 w-auto mb-4" />
+      <h1 class="text-4xl font-bold text-indigo-800 mb-6">Trial Log</h1>
+      <p class="text-gray-600 mb-8">Gestor de ensayos</p>
+      <div class="space-y-4">
+        <button
+          id="login-btn"
+          class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md flex items-center justify-center mx-auto disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg
+            class="w-6 h-6 mr-3"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 48 48"
+            width="48px"
+            height="48px"
+          >
+            <path
+              fill="#FFC107"
+              d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+            />
+            <path
+              fill="#FF3D00"
+              d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+            />
+            <path
+              fill="#4CAF50"
+              d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+            />
+            <path
+              fill="#1976D2"
+              d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.902,35.688,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+            />
+          </svg>
+          Iniciar sesión con Google
+        </button>
+        <button
+          id="phone-login-btn"
+          class="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-xl transition-transform transform hover:scale-105 hover:bg-green-600 shadow-md flex items-center justify-center mx-auto"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6 mr-3"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+            />
+          </svg>
+          Iniciar sesión con móvil
+        </button>
+      </div>
     </div>
 
     <!-- Vista de Login con Teléfono -->
-    <div id="phone-login-view" class="hidden w-full max-w-sm mx-auto mt-20 text-center">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">Inicio de Sesión con Móvil</h2>
-        <div id="phone-login-form" class="space-y-4">
-            <input type="tel" id="phone-number-input" placeholder="Tu número de teléfono" required class="w-full p-3 rounded-xl border border-gray-300">
-            <div id="recaptcha-container" class="my-4 flex justify-center"></div>
-            <button type="button" id="send-code-btn" disabled class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">Enviar Código</button>
-            <input type="text" id="verification-code-input" placeholder="Código de 6 dígitos" class="w-full p-3 rounded-xl border border-gray-300 hidden">
-            <button type="button" id="verify-code-btn" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hidden">Verificar e Iniciar Sesión</button>
-            <button type="button" id="back-to-login-btn" class="w-full text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200">Volver</button>
-        </div>
+    <div
+      id="phone-login-view"
+      class="hidden w-full max-w-sm mx-auto mt-20 text-center"
+    >
+      <h2 class="text-2xl font-bold text-gray-800 mb-4">
+        Inicio de Sesión con Móvil
+      </h2>
+      <div id="phone-login-form" class="space-y-4">
+        <input
+          type="tel"
+          id="phone-number-input"
+          placeholder="Tu número de teléfono"
+          required
+          class="w-full p-3 rounded-xl border border-gray-300"
+        />
+        <div id="recaptcha-container" class="my-4 flex justify-center"></div>
+        <button
+          type="button"
+          id="send-code-btn"
+          disabled
+          class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl disabled:opacity-50"
+        >
+          Enviar Código
+        </button>
+        <input
+          type="text"
+          id="verification-code-input"
+          placeholder="Código de 6 dígitos"
+          class="w-full p-3 rounded-xl border border-gray-300 hidden"
+        />
+        <button
+          type="button"
+          id="verify-code-btn"
+          class="w-full bg-green-500 text-white font-bold py-3 rounded-xl hidden"
+        >
+          Verificar e Iniciar Sesión
+        </button>
+        <button
+          type="button"
+          id="back-to-login-btn"
+          class="w-full text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200"
+        >
+          Volver
+        </button>
+      </div>
     </div>
 
     <!-- Contenedor principal de la aplicación (oculto por defecto) -->
-    <div id="main-container" class="hidden bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-4xl w-full space-y-8 mt-6">
-        <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center">
-                <img src="logo.png" alt="Logo" class="h-12 w-auto mr-3">
-                <h1 class="text-2xl font-bold text-indigo-800">Trial Log</h1>
+    <div
+      id="main-container"
+      class="hidden bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-4xl w-full space-y-8 mt-6"
+    >
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center">
+          <img src="logo.png" alt="Logo" class="h-12 w-auto mr-3" />
+          <h1 class="text-2xl font-bold text-indigo-800">Trial Log</h1>
+        </div>
+        <button
+          id="logout-btn"
+          class="bg-red-500 text-white p-2 rounded-xl transition-colors hover:bg-red-600"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div id="main-view">
+        <!-- Sección de Grupos -->
+        <div id="groups-section">
+          <div
+            id="group-header"
+            class="flex items-center justify-between cursor-pointer section-toggle-title"
+          >
+            <h2 class="text-2xl font-bold text-gray-800"></h2>
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </div>
+          <div id="group-selection-container" class="hidden mt-4">
+            <div class="flex items-center justify-between">
+              <select
+                id="group-selector"
+                class="w-full p-2 rounded-xl border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              ></select>
+              <div class="flex flex-shrink-0 ml-4">
+                <button
+                  id="add-group-btn"
+                  class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+                >
+                  Nuevo
+                </button>
+                <button
+                  id="delete-group-btn"
+                  class="ml-2 bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600"
+                >
+                  Eliminar
+                </button>
+              </div>
             </div>
-            <button id="logout-btn" class="bg-red-500 text-white p-2 rounded-xl transition-colors hover:bg-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-            </button>
+          </div>
         </div>
 
-        <div id="main-view">
-            <!-- Sección de Grupos -->
-            <div id="groups-section">
-                <div id="group-header" class="flex items-center justify-between cursor-pointer section-toggle-title">
-                    <h2 class="text-2xl font-bold text-gray-800"></h2>
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                </div>
-                <div id="group-selection-container" class="hidden mt-4">
-                    <div class="flex items-center justify-between">
-                        <select id="group-selector" class="w-full p-2 rounded-xl border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></select>
-                        <div class="flex flex-shrink-0 ml-4">
-                            <button id="add-group-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
-                            <button id="delete-group-btn" class="ml-2 bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600">Eliminar</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sección de Miembros -->
-            <div id="members-section" class="hidden mt-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Miembros</h2>
-                    <button id="add-member-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
-                </div>
-                <div id="members-list-view" class="hidden space-y-2">
-                    <!-- La lista de miembros se mostrará aquí -->
-                </div>
-            </div>
-
-            <!-- Sección de Temas -->
-            <div id="songs-section" class="hidden mt-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Temas</h2>
-                    <button id="add-song-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
-                </div>
-                <div id="songs-list" class="hidden space-y-2">
-                    <!-- Los temas se listarán aquí dinámicamente -->
-                </div>
-            </div>
-
-            <!-- Sección de Ensayos -->
-            <div id="rehearsals-section" class="hidden mt-8">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title">Ensayos</h2>
-                    <button id="add-rehearsal-btn" class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Nuevo</button>
-                </div>
-                <div id="rehearsals-list" class="hidden space-y-2">
-                    <!-- Los ensayos se listarán aquí dinámicamente -->
-                </div>
-            </div>
+        <!-- Sección de Miembros -->
+        <div id="members-section" class="hidden mt-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2
+              class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title"
+            >
+              Miembros
+            </h2>
+            <button
+              id="add-member-btn"
+              class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+            >
+              Nuevo
+            </button>
+          </div>
+          <div id="members-list-view" class="hidden space-y-2">
+            <!-- La lista de miembros se mostrará aquí -->
+          </div>
         </div>
 
-        <!-- Vista de Historial de Tema -->
-        <div id="song-history-view" class="hidden">
-            <button id="back-to-main-btn" class="absolute top-4 left-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- Sección de Temas -->
+        <div id="songs-section" class="hidden mt-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2
+              class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title"
+            >
+              Temas
+            </h2>
+            <button
+              id="add-song-btn"
+              class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+            >
+              Nuevo
             </button>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Historial de <span id="history-song-name"></span></h2>
-            <div id="song-links-container" class="flex justify-center space-x-4 my-4">
-                <!-- Los enlaces a video y partitura se insertarán aquí -->
-            </div>
-            <div id="song-history-chart-container" class="p-4 bg-white rounded-xl shadow-inner my-6 h-80">
-                <canvas id="song-history-chart"></canvas>
-            </div>
-            <table id="song-history-table" class="w-full text-left table-fixed text-sm">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
-                        <th class="px-4 py-2 w-1/3">Calificaciones</th>
-                        <th class="px-4 py-2">Promedio</th>
-                    </tr>
-                </thead>
-                <tbody id="song-history-list">
-                </tbody>
-            </table>
+          </div>
+          <div id="songs-list" class="hidden space-y-2">
+            <!-- Los temas se listarán aquí dinámicamente -->
+          </div>
         </div>
 
-        <!-- Vista de Crear Ensayo -->
-        <div id="create-rehearsal-view" class="hidden">
-            <button id="back-to-main-from-rehearsal-btn" class="absolute top-4 left-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+        <!-- Sección de Ensayos -->
+        <div id="rehearsals-section" class="hidden mt-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2
+              class="text-2xl font-bold text-gray-800 cursor-pointer section-toggle-title"
+            >
+              Ensayos
+            </h2>
+            <button
+              id="add-rehearsal-btn"
+              class="bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+            >
+              Nuevo
             </button>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Nuevo Ensayo</h2>
-            <form id="create-rehearsal-form">
-                <div class="mt-4">
-                    <label for="rehearsal-date" class="block text-gray-700 font-semibold mb-1">Fecha:</label>
-                    <input type="date" id="rehearsal-date" required class="w-full p-2 rounded-xl border border-gray-300">
-                </div>
-                <div class="mt-4">
-                    <label for="rehearsal-duration" class="block text-gray-700 font-semibold mb-1">Duración (minutos):</label>
-                    <input type="number" id="rehearsal-duration" min="1" value="60" required class="w-full p-2 rounded-xl border border-gray-300">
-                </div>
-                <div class="mt-4">
-                    <label class="block text-gray-700 font-semibold mb-1">Seleccionar Temas (ordenados de peor a mejor):</label>
-                    <div id="rehearsal-songs-list" class="space-y-2 p-2 bg-gray-50 rounded-lg max-h-60 overflow-y-auto">
-                        <!-- La lista de temas para seleccionar se cargará aquí -->
-                    </div>
-                </div>
-                <button type="submit" class="w-full mt-6 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600">Empezar Ensayo</button>
-            </form>
+          </div>
+          <div id="rehearsals-list" class="hidden space-y-2">
+            <!-- Los ensayos se listarán aquí dinámicamente -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Vista de Historial de Tema -->
+      <div id="song-history-view" class="hidden">
+        <button
+          id="back-to-main-btn"
+          class="absolute top-4 left-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">
+          Historial de <span id="history-song-name"></span>
+        </h2>
+        <div
+          id="song-links-container"
+          class="flex justify-center space-x-4 my-4"
+        >
+          <!-- Los enlaces a video y partitura se insertarán aquí -->
+          <button
+            id="view-structure-btn"
+            class="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 hidden"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4zm2 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Estructura</span>
+          </button>
+        </div>
+        <div
+          id="song-history-chart-container"
+          class="p-4 bg-white rounded-xl shadow-inner my-6 h-80"
+        >
+          <canvas id="song-history-chart"></canvas>
+        </div>
+        <table
+          id="song-history-table"
+          class="w-full text-left table-fixed text-sm"
+        >
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
+              <th class="px-4 py-2 w-1/3">Calificaciones</th>
+              <th class="px-4 py-2">Promedio</th>
+            </tr>
+          </thead>
+          <tbody id="song-history-list"></tbody>
+        </table>
+      </div>
+
+      <!-- Vista de Crear Ensayo -->
+      <div id="create-rehearsal-view" class="hidden">
+        <button
+          id="back-to-main-from-rehearsal-btn"
+          class="absolute top-4 left-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Nuevo Ensayo</h2>
+        <form id="create-rehearsal-form">
+          <div class="mt-4">
+            <label
+              for="rehearsal-date"
+              class="block text-gray-700 font-semibold mb-1"
+              >Fecha:</label
+            >
+            <input
+              type="date"
+              id="rehearsal-date"
+              required
+              class="w-full p-2 rounded-xl border border-gray-300"
+            />
+          </div>
+          <div class="mt-4">
+            <label
+              for="rehearsal-duration"
+              class="block text-gray-700 font-semibold mb-1"
+              >Duración (minutos):</label
+            >
+            <input
+              type="number"
+              id="rehearsal-duration"
+              min="1"
+              value="60"
+              required
+              class="w-full p-2 rounded-xl border border-gray-300"
+            />
+          </div>
+          <div class="mt-4">
+            <label class="block text-gray-700 font-semibold mb-1"
+              >Seleccionar Temas (ordenados de peor a mejor):</label
+            >
+            <div
+              id="rehearsal-songs-list"
+              class="space-y-2 p-2 bg-gray-50 rounded-lg max-h-60 overflow-y-auto"
+            >
+              <!-- La lista de temas para seleccionar se cargará aquí -->
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full mt-6 bg-green-500 text-white font-bold py-3 rounded-xl hover:bg-green-600"
+          >
+            Empezar Ensayo
+          </button>
+        </form>
+      </div>
+
+      <!-- Vista de Ensayo en Progreso -->
+      <div id="rehearsal-view" class="hidden text-center space-y-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-indigo-800">
+          Ensayando:
+        </h2>
+        <h3
+          id="current-song-title"
+          class="text-4xl sm:text-5xl font-extrabold text-purple-700"
+        ></h3>
+
+        <div
+          id="rehearsal-song-links"
+          class="flex justify-center space-x-4 mb-4"
+        >
+          <!-- Los botones para PDF y video se insertarán aquí -->
         </div>
 
-        <!-- Vista de Ensayo en Progreso -->
-        <div id="rehearsal-view" class="hidden text-center space-y-6">
-            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-800">Ensayando:</h2>
-            <h3 id="current-song-title" class="text-4xl sm:text-5xl font-extrabold text-purple-700"></h3>
-            
-            <div id="rehearsal-song-links" class="flex justify-center space-x-4 mb-4">
-                <!-- Los botones para PDF y video se insertarán aquí -->
-            </div>
-            
-            <div class="space-y-2">
-                <div id="song-timer" class="text-5xl font-mono font-bold text-gray-800">00:00</div>
-                <div class="progress-bar w-full">
-                    <div id="progress-fill" class="progress-fill"></div>
-                </div>
-                <p id="total-time-display" class="text-sm text-gray-500 font-mono"></p>
-            </div>
-
-            <p class="text-xl font-semibold text-gray-700">Califica tu rendimiento:</p>
-            <div id="rating-buttons-container" class="flex justify-center space-x-3 sm:space-x-4">
-                <button data-rating="1" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-red-400 hover:text-white transition-colors">1</button>
-                <button data-rating="2" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-orange-400 hover:text-white transition-colors">2</button>
-                <button data-rating="3" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-yellow-400 hover:text-white transition-colors">3</button>
-                <button data-rating="4" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-lime-400 hover:text-white transition-colors">4</button>
-                <button data-rating="5" class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-green-400 hover:text-white transition-colors">5</button>
-            </div>
-            
-            <div class="mt-4 p-4 bg-gray-100 rounded-xl shadow-inner">
-                <h4 class="text-lg font-semibold text-gray-700 mb-2">Calificaciones para este tema:</h4>
-                <div id="current-song-ratings-list" class="flex flex-wrap justify-center gap-2 mb-2">
-                    <!-- Las calificaciones se renderizarán aquí -->
-                </div>
-                <p id="current-song-average-rating" class="text-lg font-bold text-gray-800">Promedio: -</p>
-            </div>
-
-            <button id="next-song-btn" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md">
-                Siguiente Tema
-            </button>
-            <button id="finish-rehearsal-btn" class="w-full bg-red-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-red-700 shadow-md">
-                Terminar Ensayo
-            </button>
+        <div class="space-y-2">
+          <div
+            id="song-timer"
+            class="text-5xl font-mono font-bold text-gray-800"
+          >
+            00:00
+          </div>
+          <div class="progress-bar w-full">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <p
+            id="total-time-display"
+            class="text-sm text-gray-500 font-mono"
+          ></p>
         </div>
 
+        <p class="text-xl font-semibold text-gray-700">
+          Califica tu rendimiento:
+        </p>
+        <div
+          id="rating-buttons-container"
+          class="flex justify-center space-x-3 sm:space-x-4"
+        >
+          <button
+            data-rating="1"
+            class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-red-400 hover:text-white transition-colors"
+          >
+            1
+          </button>
+          <button
+            data-rating="2"
+            class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-orange-400 hover:text-white transition-colors"
+          >
+            2
+          </button>
+          <button
+            data-rating="3"
+            class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-yellow-400 hover:text-white transition-colors"
+          >
+            3
+          </button>
+          <button
+            data-rating="4"
+            class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-lime-400 hover:text-white transition-colors"
+          >
+            4
+          </button>
+          <button
+            data-rating="5"
+            class="rating-btn bg-gray-200 text-gray-700 font-bold p-3 rounded-lg text-lg hover:bg-green-400 hover:text-white transition-colors"
+          >
+            5
+          </button>
+        </div>
+
+        <div class="mt-4 p-4 bg-gray-100 rounded-xl shadow-inner">
+          <h4 class="text-lg font-semibold text-gray-700 mb-2">
+            Calificaciones para este tema:
+          </h4>
+          <div
+            id="current-song-ratings-list"
+            class="flex flex-wrap justify-center gap-2 mb-2"
+          >
+            <!-- Las calificaciones se renderizarán aquí -->
+          </div>
+          <p
+            id="current-song-average-rating"
+            class="text-lg font-bold text-gray-800"
+          >
+            Promedio: -
+          </p>
+        </div>
+
+        <button
+          id="next-song-btn"
+          class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-indigo-700 shadow-md"
+        >
+          Siguiente Tema
+        </button>
+        <button
+          id="finish-rehearsal-btn"
+          class="w-full bg-red-600 text-white font-bold py-3 rounded-xl transition-transform transform hover:scale-105 hover:bg-red-700 shadow-md"
+        >
+          Terminar Ensayo
+        </button>
+      </div>
     </div>
 
     <!-- Modals -->
     <div id="add-group-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Crear Nuevo Grupo</h2>
-            <form id="add-group-form">
-                <input type="text" id="new-group-name" placeholder="Nombre del grupo" required class="w-full p-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4">
-                <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Crear</button>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Crear Nuevo Grupo</h2>
+        <form id="add-group-form">
+          <input
+            type="text"
+            id="new-group-name"
+            placeholder="Nombre del grupo"
+            required
+            class="w-full p-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+          />
+          <button
+            type="submit"
+            class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+          >
+            Crear
+          </button>
+        </form>
+      </div>
     </div>
-    
+
     <div id="add-song-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Añadir Nuevo Tema</h2>
-            <form id="add-song-form">
-                <input type="text" id="new-song-name" placeholder="Nombre del tema" required class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <input type="url" id="new-song-video-url" placeholder="URL del video (YouTube, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <input type="url" id="new-song-score-url" placeholder="URL de la partitura (PDF, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600">Añadir</button>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Añadir Nuevo Tema</h2>
+        <form id="add-song-form">
+          <input
+            type="text"
+            id="new-song-name"
+            placeholder="Nombre del tema"
+            required
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <input
+            type="url"
+            id="new-song-video-url"
+            placeholder="URL del video (YouTube, etc.)"
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <input
+            type="url"
+            id="new-song-score-url"
+            placeholder="URL de la partitura (PDF, etc.)"
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <button
+            type="submit"
+            class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-600"
+          >
+            Añadir
+          </button>
+        </form>
+      </div>
     </div>
-    
+
     <div id="edit-song-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Editar Tema</h2>
-            <form id="edit-song-form">
-                <input type="hidden" id="edit-song-id">
-                <input type="text" id="edit-song-name" placeholder="Nombre del tema" required class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <input type="url" id="edit-song-video-url" placeholder="URL del video (YouTube, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <input type="url" id="edit-song-score-url" placeholder="URL de la partitura (PDF, etc.)" class="w-full p-2 rounded-xl border border-gray-300 mb-4">
-                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-indigo-700">Guardar Cambios</button>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">Editar Tema</h2>
+        <form id="edit-song-form">
+          <input type="hidden" id="edit-song-id" />
+          <input
+            type="text"
+            id="edit-song-name"
+            placeholder="Nombre del tema"
+            required
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <input
+            type="url"
+            id="edit-song-video-url"
+            placeholder="URL del video (YouTube, etc.)"
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <input
+            type="url"
+            id="edit-song-score-url"
+            placeholder="URL de la partitura (PDF, etc.)"
+            class="w-full p-2 rounded-xl border border-gray-300 mb-4"
+          />
+          <button
+            type="submit"
+            class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-indigo-700"
+          >
+            Guardar Cambios
+          </button>
+        </form>
+      </div>
     </div>
 
     <div id="invite-member-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button">&times;</span>
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Invitar Nuevo Miembro</h2>
-            <form id="invite-member-form" class="flex flex-col space-y-3">
-                <input type="text" id="new-member-identifier" placeholder="Email o teléfono del nuevo miembro..." required class="w-full p-2 rounded-xl border border-indigo-300">
-                <select id="new-member-role" class="w-full p-2 rounded-xl border border-indigo-300">
-                    <option value="reader">Lector</option>
-                    <option value="creator">Creador</option>
-                </select>
-                <button type="submit" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl">Invitar</button>
-            </form>
-        </div>
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+          Invitar Nuevo Miembro
+        </h2>
+        <form id="invite-member-form" class="flex flex-col space-y-3">
+          <input
+            type="text"
+            id="new-member-identifier"
+            placeholder="Email o teléfono del nuevo miembro..."
+            required
+            class="w-full p-2 rounded-xl border border-indigo-300"
+          />
+          <select
+            id="new-member-role"
+            class="w-full p-2 rounded-xl border border-indigo-300"
+          >
+            <option value="reader">Lector</option>
+            <option value="creator">Creador</option>
+          </select>
+          <button
+            type="submit"
+            class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-xl"
+          >
+            Invitar
+          </button>
+        </form>
+      </div>
     </div>
 
+    <!-- Modal de Estructura -->
+    <div
+      id="song-structure-modal"
+      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-white p-2 sm:p-8 rounded-xl shadow-xl w-full max-w-2xl sm:max-w-3xl mx-0 sm:mx-4 relative flex flex-col h-[90vh] sm:h-[80vh]"
+      >
+        <button
+          id="close-structure-modal"
+          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+          Notas
+        </h3>
+        <div class="mb-4 flex-1 flex flex-col">
+          <textarea
+            id="song-structure-text"
+            class="w-full flex-1 min-h-[200px] sm:min-h-[400px] p-2 sm:p-4 border rounded-lg focus:ring-2 focus:ring-indigo-500 resize-none"
+            placeholder="Escribe aquí la estructura del tema..."
+          ></textarea>
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button
+            type="button"
+            id="cancel-structure-btn"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            id="save-structure-btn"
+            class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+          >
+            Guardar
+          </button>
+        </div>
+      </div>
+    </div>
 
     <script type="module" src="script.js"></script>
     <div class="w-full text-center text-gray-500 text-sm mt-8 mb-4">
-        (C) 2025 Antonio Vázquez Araújo
+      (C) 2025 Antonio Vázquez Araújo
     </div>
-</body>
+    <div
+      id="toast-notification"
+      class="hidden fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg"
+    ></div>
+  </body>
 </html>
