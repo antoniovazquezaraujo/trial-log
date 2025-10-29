@@ -38,8 +38,9 @@ exports.inviteUserToGroup = functions.https.onCall(async (data, context) => {
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
       throw new functions.https.HttpsError('not-found', `No user found with the identifier ${identifier}.`);
+    } else if (error.code === 'auth/invalid-phone-number') {
+      throw new functions.https.HttpsError('invalid-argument', 'El número de teléfono debe estar en formato E.164.');
     }
-    // Rethrow other admin SDK errors as internal errors
     console.error(error);
     throw new functions.https.HttpsError('internal', 'An unexpected error occurred looking up the user.');
   }
