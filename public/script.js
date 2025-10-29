@@ -410,6 +410,7 @@
                     deleteGroupBtn.disabled = selectedGroup.owner !== userId;
                     addMemberBtn.classList.toggle('hidden', !isAdmin);
                     addSongBtn.classList.toggle('hidden', !isCreator);
+                    addRehearsalBtn.classList.toggle('hidden', !isCreator);
                 }
 
                 membersSection.classList.remove('hidden');

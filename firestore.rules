@@ -31,8 +31,8 @@ service cloud.firestore {
       match /rehearsals/{rehearsalId} {
         // To read a rehearsal, you must be a member of the parent group.
         allow read: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
-        // To create a rehearsal, you must be a member of the parent group.
-        allow create: if request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.memberIds;
+        // To create a rehearsal, you must be a creator or admin
+        allow create: if isCreator();
         allow delete: if isAdmin() || resource.data.createdBy == request.auth.uid;
         allow update: if false;
       }
