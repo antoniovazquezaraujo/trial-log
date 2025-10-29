@@ -5,7 +5,8 @@
   "firestore": {
     "rules": "firestore.rules"
   },
-  "hosting": {
+  "hosting": [{
+    "target": "production",
     "public": "public",
     "ignore": [
       "firebase.json",
@@ -18,7 +19,21 @@
         "destination": "/index.html"
       }
     ]
-  },
+  }, {
+    "target": "staging",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }],
   "emulators": {
     "auth": {
       "port": 9099

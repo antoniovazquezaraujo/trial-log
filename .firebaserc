@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "the-trial-log"
-  }
+  },
+  "targets": {
+    "the-trial-log": {
+      "hosting": {
+        "production": [
+          "the-trial-log"
+        ],
+        "staging": [
+          "trial-log-staging"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
