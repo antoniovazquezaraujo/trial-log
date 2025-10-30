@@ -14,7 +14,6 @@ let unsubscribeSongs = null;
 let unsubscribeRehearsals = null;
 let unsubscribeMembers = null;
 let currentUserRole = null;
-let currentSongId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginView = document.getElementById('login-view');
@@ -107,15 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const inviteMemberForm = document.getElementById('invite-member-form');
 
     saveStructureBtn.addEventListener('click', async () => {
-        if (currentSongId && selectedGroupId) {
+        const songId = songStructureModal.getAttribute('data-song-id');
+        if (songId && selectedGroupId) {
             const newStructure = songStructureText.value;
             try {
-                await updateDoc(doc(db, `groups/${selectedGroupId}/songs`, currentSongId), {
+                await updateDoc(doc(db, `groups/${selectedGroupId}/songs`, songId), {
                     structure: newStructure
                 });
                 songStructureModal.classList.add('hidden');
-                // Update the local `allSongs` array to reflect the change immediately
-                const songToUpdate = allSongs.find(s => s.id === currentSongId);
+                const songToUpdate = allSongs.find(s => s.id === songId);
                 if (songToUpdate) {
                     songToUpdate.structure = newStructure;
                 }
@@ -282,18 +281,19 @@ document.addEventListener('DOMContentLoaded', () => {
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4zm2 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
             </svg>
-            <span>Estructura</span>
+            <span>Notas</span>
         `;
         structureBtn.addEventListener('click', () => {
             const songStructureModal = document.getElementById('song-structure-modal');
             const songStructureText = document.getElementById('song-structure-text');
             if (songStructureModal && songStructureText) {
-                songStructureText.value = song.structure || '';
+                const currentSong = allSongs.find(s => s.id === song.id);
+                songStructureText.value = currentSong.structure || '';
+                songStructureModal.setAttribute('data-song-id', song.id);
                 songStructureModal.classList.remove('hidden');
             }
         });
         songLinksContainer.appendChild(structureBtn);
-        currentSongId = song.id;
 
         const relevantRehearsals = allRehearsals
             .filter(r => r.songs && r.songs.some(s => s.name === song.name))
