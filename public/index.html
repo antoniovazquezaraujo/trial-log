@@ -125,7 +125,7 @@
     <!-- Contenedor principal de la aplicación (oculto por defecto) -->
     <div
       id="main-container"
-      class="hidden bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-4xl w-full space-y-8 mt-6"
+      class="hidden bg-white rounded-3xl shadow-xl p-6 sm:p-8 max-w-7xl w-full space-y-8 mt-6"
     >
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center">
@@ -263,79 +263,36 @@
 
       <!-- Vista de Historial de Tema -->
       <div id="song-history-view" class="hidden">
-        <button
-          id="back-to-main-btn"
-          class="absolute top-4 left-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">
-          Historial de <span id="history-song-name"></span>
-        </h2>
+        <div class="flex items-center mb-4">
+            <button id="back-to-main-btn" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-gray-600 mr-4">
+                &larr; Volver
+            </button>
+            <h2 class="text-2xl font-bold text-gray-800">
+              <span id="history-song-name"></span>
+            </h2>
+        </div>
         <div
           id="song-links-container"
           class="flex justify-center space-x-4 my-4"
         >
-          <!-- Los enlaces a video y partitura se insertarán aquí -->
-          <button
-            id="view-history-btn"
-            class="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 10.586V6z"
-                clip-rule="evenodd"
-              />
-            </svg>
-            <span>Ver Historial</span>
-          </button>
+          <!-- Los enlaces a video, partitura e historial se insertarán aquí -->
         </div>
-        <div id="song-notes-container" class="my-6">
+        <div id="song-notes-section" class="my-6">
           <h3 class="text-xl font-bold text-gray-800 mb-2">Notas</h3>
-          <div
-            id="song-notes-content"
-            class="p-4 bg-gray-100 rounded-xl shadow-inner"
-          ></div>
-        </div>
-        <div id="song-history-content" class="hidden">
-          <div
-            id="song-history-chart-container"
-            class="p-4 bg-white rounded-xl shadow-inner my-6 h-80"
-          >
-            <canvas id="song-history-chart"></canvas>
+          <textarea
+            id="song-structure-text"
+            class="w-full h-96 p-4 border rounded-lg focus:ring-2 focus:ring-indigo-500 resize-y"
+            placeholder="Escribe aquí las notas del tema..."
+          ></textarea>
+          <div class="flex justify-end mt-4">
+            <button
+              type="button"
+              id="save-structure-btn"
+              class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+            >
+              Guardar Notas
+            </button>
           </div>
-          <table
-            id="song-history-table"
-            class="w-full text-left table-fixed text-sm"
-          >
-            <thead class="bg-gray-200">
-              <tr>
-                <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
-                <th class="px-4 py-2 w-1/3">Calificaciones</th>
-                <th class="px-4 py-2">Promedio</th>
-              </tr>
-            </thead>
-            <tbody id="song-history-list"></tbody>
-          </table>
         </div>
       </div>
 
@@ -638,58 +595,34 @@
       </div>
     </div>
 
-    <!-- Modal de Estructura -->
-    <div
-      id="song-structure-modal"
-      class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50"
-    >
-      <div
-        class="bg-white p-2 sm:p-8 rounded-xl shadow-xl w-full max-w-2xl sm:max-w-3xl mx-0 sm:mx-4 relative flex flex-col h-[90vh] sm:h-[80vh]"
-      >
-        <button
-          id="close-structure-modal"
-          class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+    <!-- Modal de Historial -->
+    <div id="history-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">
+          Historial de <span id="history-modal-song-name"></span>
+        </h2>
+        <div
+          id="song-history-chart-container"
+          class="p-4 bg-white rounded-xl shadow-inner my-6 h-80"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <h3 class="text-2xl font-bold text-gray-800 mb-4">
-          Notas
-        </h3>
-        <div class="mb-4 flex-1 flex flex-col">
-          <textarea
-            id="song-structure-text"
-            class="w-full flex-1 min-h-[200px] sm:min-h-[400px] p-2 sm:p-4 border rounded-lg focus:ring-2 focus:ring-indigo-500 resize-none"
-            placeholder="Escribe aquí la estructura del tema..."
-          ></textarea>
+          <canvas id="song-history-chart"></canvas>
         </div>
-        <div class="flex justify-end space-x-4">
-          <button
-            type="button"
-            id="cancel-structure-btn"
-            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
-            id="save-structure-btn"
-            class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
-          >
-            Guardar
-          </button>
+        <table
+          id="song-history-table"
+          class="w-full text-left table-fixed text-sm"
+        >
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
+              <th class="px-4 py-2 w-1/3">Calificaciones</th>
+              <th class="px-4 py-2">Promedio</th>
+            </tr>
+          </thead>
+          <tbody id="song-history-list"></tbody>
+        </table>
+        <div class="flex justify-end mt-4">
+            <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-gray-600 close-button">Volver</button>
         </div>
       </div>
     </div>

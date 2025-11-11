@@ -57,17 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const historySongName = document.getElementById('history-song-name');
     const songLinksContainer = document.getElementById('song-links-container');
     const songHistoryList = document.getElementById('song-history-list');
-    const viewHistoryBtn = document.getElementById('view-history-btn');
-    const songNotesContainer = document.getElementById('song-notes-container');
-    const songNotesContent = document.getElementById('song-notes-content');
-    const songHistoryContent = document.getElementById('song-history-content');
 
     // Structure Modal
-    const songStructureModal = document.getElementById('song-structure-modal');
     const songStructureText = document.getElementById('song-structure-text');
     const saveStructureBtn = document.getElementById('save-structure-btn');
-    const cancelStructureBtn = document.getElementById('cancel-structure-btn');
-    const closeStructureBtn = document.getElementById('close-structure-modal');
     const songHistoryChartCtx = document.getElementById('song-history-chart').getContext('2d');
 
     // Create Rehearsal View
@@ -110,31 +103,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const inviteMemberForm = document.getElementById('invite-member-form');
 
     saveStructureBtn.addEventListener('click', async () => {
-        const songId = songStructureModal.getAttribute('data-song-id');
+        const songId = saveStructureBtn.getAttribute('data-song-id');
         if (songId && selectedGroupId) {
             const newStructure = songStructureText.value;
             try {
                 await updateDoc(doc(db, `groups/${selectedGroupId}/songs`, songId), {
                     structure: newStructure
                 });
-                songStructureModal.classList.add('hidden');
+                showToast('Notas guardadas.');
                 const songToUpdate = allSongs.find(s => s.id === songId);
                 if (songToUpdate) {
                     songToUpdate.structure = newStructure;
                 }
             } catch (error) {
                 console.error("Error guardando la estructura:", error);
+                showToast('Error al guardar las notas.', 'error');
             }
         }
     });
 
-    closeStructureBtn.addEventListener('click', () => {
-        songStructureModal.classList.add('hidden');
-    });
-
-    cancelStructureBtn.addEventListener('click', () => {
-        songStructureModal.classList.add('hidden');
-    });
+    
 
     function initFirebase() {
         fetch('/__/firebase/init.json').then(async response => {
@@ -258,14 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
         historySongName.textContent = song.name;
         songHistoryList.innerHTML = '';
         songLinksContainer.innerHTML = '';
-        songHistoryContent.classList.add('hidden');
 
         if (song.videoUrl) {
             const videoLink = document.createElement('a');
             videoLink.href = song.videoUrl;
             videoLink.target = '_blank';
             videoLink.className = 'bg-red-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-red-600';
-            videoLink.textContent = 'Ver Video';
+            videoLink.textContent = 'Video';
             songLinksContainer.appendChild(videoLink);
         }
 
@@ -274,16 +261,23 @@ document.addEventListener('DOMContentLoaded', () => {
             scoreLink.href = song.scoreUrl;
             scoreLink.target = '_blank';
             scoreLink.className = 'bg-blue-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-600';
-            scoreLink.textContent = 'Ver Partitura';
+            scoreLink.textContent = 'Partitura';
             songLinksContainer.appendChild(scoreLink);
         }
 
-        // Mostrar notas directamente
-        songNotesContent.textContent = song.structure || 'No hay notas para este tema.';
+        const historyModal = document.getElementById('history-modal');
+        const historyBtn = document.createElement('button');
+        historyBtn.className = 'bg-purple-500 text-white font-bold py-2 px-4 rounded-xl hover:bg-purple-600';
+        historyBtn.textContent = 'Historial';
+        historyBtn.addEventListener('click', () => {
+            document.getElementById('history-modal-song-name').textContent = song.name;
+            historyModal.style.display = 'flex';
+        });
+        songLinksContainer.appendChild(historyBtn);
 
-        viewHistoryBtn.onclick = () => {
-            songHistoryContent.classList.toggle('hidden');
-        };
+        // Set song id for save button and populate notes
+        saveStructureBtn.setAttribute('data-song-id', song.id);
+        songStructureText.value = song.structure || '';
 
         const relevantRehearsals = allRehearsals
             .filter(r => r.songs && r.songs.some(s => s.name === song.name))
@@ -726,9 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Modal handling
     function setupModal(modal, openBtn) {
-        const closeBtn = modal.querySelector('.close-button');
+        const closeBtns = modal.querySelectorAll('.close-button');
         if(openBtn) openBtn.addEventListener('click', () => modal.style.display = 'flex');
-        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        closeBtns.forEach(btn => {
+            btn.addEventListener('click', () => modal.style.display = 'none');
+        });
         window.addEventListener('click', (e) => {
             if (e.target === modal) modal.style.display = 'none';
         });
@@ -738,6 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModal(addSongModal, addSongBtn);
     setupModal(inviteMemberModal, addMemberBtn);
     setupModal(editSongModal);
+    setupModal(document.getElementById('history-modal'));
 
     // Form submissions
     addGroupForm.addEventListener('submit', async (e) => {
