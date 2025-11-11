@@ -57,6 +57,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const historySongName = document.getElementById('history-song-name');
     const songLinksContainer = document.getElementById('song-links-container');
     const songHistoryList = document.getElementById('song-history-list');
+    const viewHistoryBtn = document.getElementById('view-history-btn');
+    const songNotesContainer = document.getElementById('song-notes-container');
+    const songNotesContent = document.getElementById('song-notes-content');
+    const songHistoryContent = document.getElementById('song-history-content');
 
     // Structure Modal
     const songStructureModal = document.getElementById('song-structure-modal');
@@ -254,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         historySongName.textContent = song.name;
         songHistoryList.innerHTML = '';
         songLinksContainer.innerHTML = '';
-
+        songHistoryContent.classList.add('hidden');
 
         if (song.videoUrl) {
             const videoLink = document.createElement('a');
@@ -274,26 +278,12 @@ document.addEventListener('DOMContentLoaded', () => {
             songLinksContainer.appendChild(scoreLink);
         }
 
-        // Botón de estructura dinámico
-        const structureBtn = document.createElement('button');
-        structureBtn.className = 'flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600';
-        structureBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4zm2 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
-            </svg>
-            <span>Notas</span>
-        `;
-        structureBtn.addEventListener('click', () => {
-            const songStructureModal = document.getElementById('song-structure-modal');
-            const songStructureText = document.getElementById('song-structure-text');
-            if (songStructureModal && songStructureText) {
-                const currentSong = allSongs.find(s => s.id === song.id);
-                songStructureText.value = currentSong.structure || '';
-                songStructureModal.setAttribute('data-song-id', song.id);
-                songStructureModal.classList.remove('hidden');
-            }
-        });
-        songLinksContainer.appendChild(structureBtn);
+        // Mostrar notas directamente
+        songNotesContent.textContent = song.structure || 'No hay notas para este tema.';
+
+        viewHistoryBtn.onclick = () => {
+            songHistoryContent.classList.toggle('hidden');
+        };
 
         const relevantRehearsals = allRehearsals
             .filter(r => r.songs && r.songs.some(s => s.name === song.name))

@@ -291,8 +291,8 @@
         >
           <!-- Los enlaces a video y partitura se insertarán aquí -->
           <button
-            id="view-structure-btn"
-            class="flex items-center space-x-2 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 hidden"
+            id="view-history-btn"
+            class="flex items-center space-x-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -302,32 +302,41 @@
             >
               <path
                 fill-rule="evenodd"
-                d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4zm2 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm0 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.414L11 10.586V6z"
                 clip-rule="evenodd"
               />
             </svg>
-            <span>Estructura</span>
+            <span>Ver Historial</span>
           </button>
         </div>
-        <div
-          id="song-history-chart-container"
-          class="p-4 bg-white rounded-xl shadow-inner my-6 h-80"
-        >
-          <canvas id="song-history-chart"></canvas>
+        <div id="song-notes-container" class="my-6">
+          <h3 class="text-xl font-bold text-gray-800 mb-2">Notas</h3>
+          <div
+            id="song-notes-content"
+            class="p-4 bg-gray-100 rounded-xl shadow-inner"
+          ></div>
         </div>
-        <table
-          id="song-history-table"
-          class="w-full text-left table-fixed text-sm"
-        >
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
-              <th class="px-4 py-2 w-1/3">Calificaciones</th>
-              <th class="px-4 py-2">Promedio</th>
-            </tr>
-          </thead>
-          <tbody id="song-history-list"></tbody>
-        </table>
+        <div id="song-history-content" class="hidden">
+          <div
+            id="song-history-chart-container"
+            class="p-4 bg-white rounded-xl shadow-inner my-6 h-80"
+          >
+            <canvas id="song-history-chart"></canvas>
+          </div>
+          <table
+            id="song-history-table"
+            class="w-full text-left table-fixed text-sm"
+          >
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="px-4 py-2 w-2/5 whitespace-nowrap">Fecha</th>
+                <th class="px-4 py-2 w-1/3">Calificaciones</th>
+                <th class="px-4 py-2">Promedio</th>
+              </tr>
+            </thead>
+            <tbody id="song-history-list"></tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Vista de Crear Ensayo -->
